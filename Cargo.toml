@@ -1,0 +1,16 @@
+[workspace]
+members = ["vectorscan-rs", "vectorscan-rs-sys"]
+resolver = "2"
+
+[workspace.package]
+
+license = "Apache-2.0 OR MIT"
+authors = ["Brad Larsen <brad@bradfordlarsen.com>"]
+
+edition = "2021"
+rust-version = "1.73"
+
+repository = "https://github.com/bradlarsen/vectorscan-rs"
+
+keywords = ["ffi", "bindings", "text", "regex"]
+categories = ["api-bindings", "parsing", "text-processing"]
