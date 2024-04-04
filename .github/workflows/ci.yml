@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix:
         build:
-        - macos-13.arm64.stable.test
+        - macos-14.arm64.stable.test
         - macos-12.x86_64.stable.test
         - ubuntu-20.04.x86_64.stable.release
         - ubuntu-22.04.x86_64.stable.test
@@ -87,8 +87,8 @@ jobs:
           check_docs: false
           run_tests: true
 
-        - build: macos-13.arm64.stable.test
-          os: macos-13-xlarge  # m1-based macos
+        - build: macos-14.arm64.stable.test
+          os: macos-14  # m1-based macos
           rust: stable
           profile: test
           features:
