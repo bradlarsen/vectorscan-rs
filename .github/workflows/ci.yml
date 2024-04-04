@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  pull_request:
+
+  push:
+    branches:
+    - main
+
+  schedule:
+  # Force a run every day at 0037 UTC
+  - cron: '00 37 * * *'
+
+
+env:
+  CI: '1'
+
+  CARGO_TERM_COLOR: 'always'
+
+  # Emit backtraces on panics (though these may be worthless without debug info).
+  RUST_BACKTRACE: '1'
+
+  # Disable incremental builds; see https://matklad.github.io/2021/09/04/fast-rust-builds.html:
+  #
+  #     CI builds often are closer to from-scratch builds, as changes are typically much bigger than from a local edit-compile cycle.
+  #     For from-scratch builds, incremental adds an extra dependency-tracking overhead.
+  #     It also significantly increases the amount of IO and the size of ./target, which make caching less effective.
+  CARGO_INCREMENTAL: '0'
+
+  # Disable debug info in CI; speeds up builds and shrinks Actions caches a bit
+  CARGO_PROFILE_RELEASE_DEBUG: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+
+  # Enable Cargo output explaining why things are being rebuilt.
+  # This can be useful to investigate why caching is not working as expected.
+  #
+  # https://stackoverflow.com/a/70174212
+  # https://doc.crates.io/contrib/implementation/debugging.html#logging
+  # CARGO_LOG: 'cargo::core::compiler::fingerprint=info'
+
+jobs:
+  tests:
+    name: CI
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        build:
+        - macos-13.arm64.stable.test
+        - macos-12.x86_64.stable.test
+        - ubuntu-20.04.x86_64.stable.release
+        - ubuntu-22.04.x86_64.stable.test
+
+        include:
+        - build: ubuntu-20.04.x86_64.stable.release
+          os: ubuntu-20.04
+          rust: stable
+          profile: release
+          features: release
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+
+          check_docs: false
+          run_tests: true
+
+        - build: ubuntu-22.04.x86_64.stable.test
+          os: ubuntu-22.04
+          rust: stable
+          profile: test
+          features:
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+
+          check_docs: true
+          run_tests: true
+
+        - build: macos-12.x86_64.stable.test
+          os: macos-12
+          rust: stable
+          profile: test
+          features:
+          install_dependencies: |
+            brew install coreutils boost
+
+          check_docs: false
+          run_tests: true
+
+        - build: macos-13.arm64.stable.test
+          os: macos-13-xlarge  # m1-based macos
+          rust: stable
+          profile: test
+          features:
+          install_dependencies: |
+            brew install coreutils boost
+
+          check_docs: false
+          run_tests: true
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: ${{ matrix.install_dependencies }}
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+
+    - name: Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: 'ci-tests'
+        key: ${{ matrix.build }}
+
+    - name: Build tests
+      if: ${{ matrix.run_tests }}
+      run: cargo test --no-run --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+
+    - name: Run tests
+      if: ${{ matrix.run_tests }}
+      run: cargo test --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+
+    - name: Check documentation
+      if: ${{ matrix.check_docs }}
+      env:
+        RUSTDOCFLAGS: -D warnings
+      run: cargo doc --locked --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings --no-deps --document-private-items
+
+    # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
+    - name: Upload build timings
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-timings.${{ matrix.build }}
+        path: target/cargo-timings
+        if-no-files-found: error
