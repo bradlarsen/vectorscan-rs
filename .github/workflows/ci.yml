@@ -58,7 +58,7 @@ jobs:
           os: ubuntu-20.04
           rust: stable
           profile: release
-          features: release
+          features:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
 
