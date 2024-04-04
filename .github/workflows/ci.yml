@@ -105,7 +105,6 @@ jobs:
           profile: test
           features:
           install_dependencies: |
-            vcpkg install boost
 
           check_docs: false
           run_tests: true
