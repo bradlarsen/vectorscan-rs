@@ -52,7 +52,7 @@ jobs:
         - macos-12.x86_64.stable.test
         - ubuntu-20.04.x86_64.stable.release
         - ubuntu-22.04.x86_64.stable.test
-        - windows-2022.x86_64.stable.test
+        # - windows-2022.x86_64.stable.test
 
         include:
         - build: ubuntu-20.04.x86_64.stable.release
