@@ -1,7 +1,7 @@
 # `vectorscan-rs`
 
 ## Overview
-This crate exposes a more ergonomic Rust interface on top of the raw C bindings to [Vectorscan](https://github.com/Vectorcamp/vectorscan) that are exposed in the [`vectorscan-rs-sys`](../vectorscan-rs-sys) crate.
+This crate exposes a more ergonomic Rust interface on top of the native bindings to [Vectorscan](https://github.com/Vectorcamp/vectorscan) that are exposed in the [`vectorscan-rs-sys`](../vectorscan-rs-sys) crate.
 
 This crate was originally written as part of [Nosey Parker](https://github.com/praetorian-inc/noseyparker).
 This crate was adapted from the [pyperscan](https://github.com/vlaci/pyperscan) project, which uses Rust to expose [Hyperscan](https://github.com/intel/hyperscan) to Python.
