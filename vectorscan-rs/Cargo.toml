@@ -1,9 +1,9 @@
 [package]
 name = "vectorscan-rs"
-description = "Rust bindings to the Vectorscan high-performance regex library"
-version = "0.0.1"
+description = "Ergonomic bindings to the Vectorscan high-performance regex library"
 readme = "README.md"
 
+version.workspace = true
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true

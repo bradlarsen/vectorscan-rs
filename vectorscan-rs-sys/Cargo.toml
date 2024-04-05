@@ -1,12 +1,12 @@
 [package]
 name = "vectorscan-rs-sys"
-description = "Rust bindings to the Vectorscan high-performance regex library"
-version = "0.0.1"
+description = "Native bindings to the Vectorscan high-performance regex library"
 readme = "README.md"
 
 build = "build.rs"
 links = "hs"
 
+version.workspace = true
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true

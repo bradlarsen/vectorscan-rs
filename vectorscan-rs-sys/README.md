@@ -2,7 +2,7 @@
 
 
 ## Overview
-This crate implements minimal Rust bindings to the [https://github.com/Vectorcamp/vectorscan](Vectorscan) fork of [https://github.com/intel/hyperscan](Hyperscan), the high-performance regular expression engine.
+This crate implements minimal Rust bindings to the [Vectorscan](https://github.com/Vectorcamp/vectorscan) fork of [https://github.com/intel/hyperscan](Hyperscan), the high-performance regular expression engine.
 This crate builds a vendored copy of Vectorscan from source.
 
 
@@ -17,7 +17,7 @@ This has been tested on x86_64 Linux, x86_64 macOS, and aarch64 macOS.
 
 ## Implementation Notes
 This crate was originally written as part of [Nosey Parker](https://github.com/praetorian-inc/noseyparker).
-It was adapted from the [https://github.com/vlaci/pyperscan](pyperscan) project, which uses Rust to expose Hyperscan to Python.
+It was adapted from the [pyperscan](https://github.com/vlaci/pyperscan) project, which uses Rust to expose [Hyperscan](https://github.com/intel/hyperscan) to Python.
 (That project is released under either the Apache 2.0 or MIT license.)
 
 The only bindings exposed at present are for Vectorscan's block-based matching APIs.
@@ -38,10 +38,10 @@ This patch does a few things:
 This project is licensed under either of
 
 - [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-  ([LICENSE-APACHE](LICENSE-APACHE))
+  ([LICENSE-APACHE](../LICENSE-APACHE))
 
 - [MIT License](https://opensource.org/licenses/MIT)
-  ([LICENSE-MIT](LICENSE-MIT))
+  ([LICENSE-MIT](../LICENSE-MIT))
 
 at your option.
 

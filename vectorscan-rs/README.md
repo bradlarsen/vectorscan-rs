@@ -1,10 +1,10 @@
 # `vectorscan-rs`
 
 ## Overview
-This crate exposes a more ergonomic Rust interface on top of the raw C bindings to [https://github.com/Vectorcamp/vectorscan](Vectorscan) that are exposed in the [`vectorscan-rs-sys`](../vectorscan-rs-sys) crate.
+This crate exposes a more ergonomic Rust interface on top of the raw C bindings to [Vectorscan](https://github.com/Vectorcamp/vectorscan) that are exposed in the [`vectorscan-rs-sys`](../vectorscan-rs-sys) crate.
 
 This crate was originally written as part of [Nosey Parker](https://github.com/praetorian-inc/noseyparker).
-This crate was adapted from the [https://github.com/vlaci/pyperscan](pyperscan) project, which uses Rust to expose Hyperscan to Python.
+This crate was adapted from the [pyperscan](https://github.com/vlaci/pyperscan) project, which uses Rust to expose [Hyperscan](https://github.com/intel/hyperscan) to Python.
 (That project is released under either the Apache 2.0 or MIT license.)
 
 
@@ -12,10 +12,10 @@ This crate was adapted from the [https://github.com/vlaci/pyperscan](pyperscan) 
 This project is licensed under either of
 
 - [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-  ([LICENSE-APACHE](LICENSE-APACHE))
+  ([LICENSE-APACHE](../LICENSE-APACHE))
 
 - [MIT License](https://opensource.org/licenses/MIT)
-  ([LICENSE-MIT](LICENSE-MIT))
+  ([LICENSE-MIT](../LICENSE-MIT))
 
 at your option.
 
