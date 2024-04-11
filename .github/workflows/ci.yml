@@ -41,7 +41,7 @@ env:
 
 jobs:
   tests:
-    name: CI
+    name: CI (${{ matrix.name }})
 
     runs-on: ${{ matrix.os }}
 
