@@ -1,26 +1,16 @@
-diff -ruN vectorscan-vectorscan-5.4.11/CMakeLists.txt vectorscan/CMakeLists.txt
---- vectorscan-vectorscan-5.4.11/CMakeLists.txt	2023-11-21 06:34:40
-+++ vectorscan/CMakeLists.txt	2024-03-22 16:24:54
-@@ -25,16 +25,20 @@
+diff -ruN vectorscan-vectorscan-5.4.11.clean/CMakeLists.txt vectorscan-vectorscan-5.4.11.dev/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11.clean/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan-vectorscan-5.4.11.dev/CMakeLists.txt	2024-04-12 17:22:56
+@@ -25,16 +25,9 @@
  include (GNUInstallDirs)
  include (${CMAKE_MODULE_PATH}/platform.cmake)
  include (${CMAKE_MODULE_PATH}/boost.cmake)
 -include (${CMAKE_MODULE_PATH}/ragel.cmake)
-+# PATCH
-+# include (${CMAKE_MODULE_PATH}/ragel.cmake)
-+# /PATCH
  
  find_package(PkgConfig REQUIRED)
  
 -find_program(RAGEL ragel)
-+# PATCH
-+# find_program(RAGEL ragel)
-+# 
-+# if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
-+#     message(FATAL_ERROR "Ragel state machine compiler not found")
-+# endif()
-+# /PATCH
- 
+-
 -if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
 -    message(FATAL_ERROR "Ragel state machine compiler not found")
 -endif()
@@ -28,54 +18,58 @@ diff -ruN vectorscan-vectorscan-5.4.11/CMakeLists.txt vectorscan/CMakeLists.txt
  # Build type check
  
  if (NOT CMAKE_BUILD_TYPE)
-@@ -198,14 +202,18 @@
+@@ -138,12 +131,13 @@
+ include (${CMAKE_MODULE_PATH}/sanitize.cmake)
+ 
+ if (NOT FAT_RUNTIME)
+-    if (GNUCC_TUNE)
++    if (USE_CPU_NATIVE AND GNUCC_TUNE)
+         set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
+         set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
+-    else()
++    elseif(USE_CPU_NATIVE)
+         set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_C_FLAGS}")
+         set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_CXX_FLAGS}")
++    else()
+     endif()
+ endif()
+ 
+@@ -198,15 +192,11 @@
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
 -ragelmaker(src/parser/Parser.rl)
-+# PATCH
-+# ragelmaker(src/parser/Parser.rl)
-+# /PATCH
- 
+-
  set_source_files_properties(
     src/parser/control_verbs.cpp
      PROPERTIES
          COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
 -ragelmaker(src/parser/control_verbs.rl)
-+# PATCH
-+# ragelmaker(src/parser/control_verbs.rl)
-+# /PATCH
- 
+-
  # do substitutions
  configure_file(${CMAKE_MODULE_PATH}/config.h.in ${PROJECT_BINARY_DIR}/config.h)
-@@ -1147,9 +1155,11 @@
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ configure_file(src/hs_version.h.in ${PROJECT_BINARY_DIR}/hs_version.h)
+@@ -1148,10 +1138,6 @@
  endif()
  
--if (BUILD_STATIC_LIBS)
+ if (BUILD_STATIC_LIBS)
 -    add_dependencies(hs ragel_Parser)
 -endif ()
-+# PATCH
-+# if (BUILD_STATIC_LIBS)
-+#     add_dependencies(hs ragel_Parser)
-+# endif ()
-+# /PATCH
- 
- if (BUILD_STATIC_LIBS)
+-
+-if (BUILD_STATIC_LIBS)
      install(TARGETS hs DESTINATION ${CMAKE_INSTALL_LIBDIR})
-@@ -1174,7 +1184,9 @@
+ endif()
+ 
+@@ -1174,7 +1160,6 @@
  
      add_library(hs_shared SHARED ${hs_shared_SRCS} hs.def)
  
 -    add_dependencies(hs_shared ragel_Parser)
-+    # PATCH
-+    # add_dependencies(hs_shared ragel_Parser)
-+    # /PATCH
      set_target_properties(hs_shared PROPERTIES
          OUTPUT_NAME hs
          VERSION ${LIB_VERSION}
-@@ -1194,11 +1206,17 @@
+@@ -1194,11 +1179,17 @@
  endif ()
  
  add_subdirectory(util)
@@ -95,7 +89,7 @@ diff -ruN vectorscan-vectorscan-5.4.11/CMakeLists.txt vectorscan/CMakeLists.txt
  if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
      add_subdirectory(chimera)
  endif()
-@@ -1213,4 +1231,7 @@
+@@ -1213,4 +1204,7 @@
      add_subdirectory(benchmarks)
  endif()
  
@@ -104,9 +98,26 @@ diff -ruN vectorscan-vectorscan-5.4.11/CMakeLists.txt vectorscan/CMakeLists.txt
 +if(BUILD_DOC)
 +    add_subdirectory(doc/dev-reference)
 +endif()
-diff -ruN vectorscan-vectorscan-5.4.11/src/parser/Parser.cpp vectorscan/src/parser/Parser.cpp
---- vectorscan-vectorscan-5.4.11/src/parser/Parser.cpp	1969-12-31 19:00:00
-+++ vectorscan/src/parser/Parser.cpp	2024-03-22 16:24:54
+diff -ruN vectorscan-vectorscan-5.4.11.clean/cmake/archdetect.cmake vectorscan-vectorscan-5.4.11.dev/cmake/archdetect.cmake
+--- vectorscan-vectorscan-5.4.11.clean/cmake/archdetect.cmake	2023-11-21 06:34:40
++++ vectorscan-vectorscan-5.4.11.dev/cmake/archdetect.cmake	2024-04-12 17:20:43
+@@ -67,8 +67,11 @@
+         message(STATUS "clang will tune for ${GNUCC_ARCH}, ${TUNE_FLAG}")
+     endif()
+ else()
+-    if (ARCH_IA32 OR ARCH_X86_64)
+-        set(GNUCC_ARCH native)
++    if (ARCH_IA32)
++        set(GNUCC_ARCH i686)
++        set(TUNE_FLAG generic)
++    elseif(ARCH_X86_64)
++        set(GNUCC_ARCH x86-64)
+         set(TUNE_FLAG generic)
+     elseif(ARCH_AARCH64)
+         if (BUILD_SVE2_BITPERM)
+diff -ruN vectorscan-vectorscan-5.4.11.clean/src/parser/Parser.cpp vectorscan-vectorscan-5.4.11.dev/src/parser/Parser.cpp
+--- vectorscan-vectorscan-5.4.11.clean/src/parser/Parser.cpp	1969-12-31 19:00:00
++++ vectorscan-vectorscan-5.4.11.dev/src/parser/Parser.cpp	2024-04-12 17:06:39
 @@ -0,0 +1,11614 @@
 +
 +#line 1 "src/parser/Parser.rl"
@@ -11722,9 +11733,9 @@ diff -ruN vectorscan-vectorscan-5.4.11/src/parser/Parser.cpp vectorscan/src/pars
 +}
 +
 +} // namespace ue2
-diff -ruN vectorscan-vectorscan-5.4.11/src/parser/control_verbs.cpp vectorscan/src/parser/control_verbs.cpp
---- vectorscan-vectorscan-5.4.11/src/parser/control_verbs.cpp	1969-12-31 19:00:00
-+++ vectorscan/src/parser/control_verbs.cpp	2024-03-22 16:24:54
+diff -ruN vectorscan-vectorscan-5.4.11.clean/src/parser/control_verbs.cpp vectorscan-vectorscan-5.4.11.dev/src/parser/control_verbs.cpp
+--- vectorscan-vectorscan-5.4.11.clean/src/parser/control_verbs.cpp	1969-12-31 19:00:00
++++ vectorscan-vectorscan-5.4.11.dev/src/parser/control_verbs.cpp	2024-04-12 17:06:39
 @@ -0,0 +1,865 @@
 +
 +#line 1 "src/parser/control_verbs.rl"
@@ -12591,34 +12602,29 @@ diff -ruN vectorscan-vectorscan-5.4.11/src/parser/control_verbs.cpp vectorscan/s
 +}
 +
 +} // namespace ue2
-diff -ruN vectorscan-vectorscan-5.4.11/tools/hscollider/CMakeLists.txt vectorscan/tools/hscollider/CMakeLists.txt
---- vectorscan-vectorscan-5.4.11/tools/hscollider/CMakeLists.txt	2023-11-21 06:34:40
-+++ vectorscan/tools/hscollider/CMakeLists.txt	2024-03-22 16:24:54
-@@ -21,7 +21,9 @@
+diff -ruN vectorscan-vectorscan-5.4.11.clean/tools/hscollider/CMakeLists.txt vectorscan-vectorscan-5.4.11.dev/tools/hscollider/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11.clean/tools/hscollider/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan-vectorscan-5.4.11.dev/tools/hscollider/CMakeLists.txt	2024-04-12 17:23:08
+@@ -21,8 +21,6 @@
      PROPERTIES
      COMPILE_FLAGS "${RAGEL_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}")
  
 -ragelmaker(ColliderCorporaParser.rl)
-+# PATCH
-+# ragelmaker(ColliderCorporaParser.rl)
-+# /PATCH
- 
+-
  if (BUILD_CHIMERA)
      add_definitions(-DHS_HYBRID)
-@@ -63,7 +65,9 @@
+ endif()
+@@ -63,7 +61,6 @@
  set_source_files_properties(${hscollider_SOURCES} PROPERTIES
      INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
  add_executable(hscollider ${hscollider_SOURCES})
 -add_dependencies(hscollider ragel_ColliderCorporaParser)
-+# PATCH
-+# add_dependencies(hscollider ragel_ColliderCorporaParser)
-+# /PATCH
  
  if (BUILD_CHIMERA)
      target_link_libraries(hscollider hs chimera ${PCRE_LDFLAGS} databaseutil
-diff -ruN vectorscan-vectorscan-5.4.11/tools/hscollider/ColliderCorporaParser.cpp vectorscan/tools/hscollider/ColliderCorporaParser.cpp
---- vectorscan-vectorscan-5.4.11/tools/hscollider/ColliderCorporaParser.cpp	1969-12-31 19:00:00
-+++ vectorscan/tools/hscollider/ColliderCorporaParser.cpp	2024-03-22 16:24:54
+diff -ruN vectorscan-vectorscan-5.4.11.clean/tools/hscollider/ColliderCorporaParser.cpp vectorscan-vectorscan-5.4.11.dev/tools/hscollider/ColliderCorporaParser.cpp
+--- vectorscan-vectorscan-5.4.11.clean/tools/hscollider/ColliderCorporaParser.cpp	1969-12-31 19:00:00
++++ vectorscan-vectorscan-5.4.11.dev/tools/hscollider/ColliderCorporaParser.cpp	2024-04-12 17:06:39
 @@ -0,0 +1,532 @@
 +
 +#line 1 "tools/hscollider/ColliderCorporaParser.rl"
@@ -13152,34 +13158,29 @@ diff -ruN vectorscan-vectorscan-5.4.11/tools/hscollider/ColliderCorporaParser.cp
 +
 +    return (cs != FileCorporaParser_error) && (p == pe);
 +}
-diff -ruN vectorscan-vectorscan-5.4.11/util/CMakeLists.txt vectorscan/util/CMakeLists.txt
---- vectorscan-vectorscan-5.4.11/util/CMakeLists.txt	2023-11-21 06:34:40
-+++ vectorscan/util/CMakeLists.txt	2024-03-22 16:24:54
-@@ -13,7 +13,9 @@
+diff -ruN vectorscan-vectorscan-5.4.11.clean/util/CMakeLists.txt vectorscan-vectorscan-5.4.11.dev/util/CMakeLists.txt
+--- vectorscan-vectorscan-5.4.11.clean/util/CMakeLists.txt	2023-11-21 06:34:40
++++ vectorscan-vectorscan-5.4.11.dev/util/CMakeLists.txt	2024-04-12 17:23:13
+@@ -13,8 +13,6 @@
      PROPERTIES
      COMPILE_FLAGS "${RAGEL_C_FLAGS}")
  
 -ragelmaker(ExpressionParser.rl)
-+# PATCH
-+# ragelmaker(ExpressionParser.rl)
-+# /PATCH
- 
+-
  set(expressionutil_SRCS
      expressions.cpp
-@@ -22,7 +24,9 @@
+     expressions.h
+@@ -22,7 +20,6 @@
      ExpressionParser.cpp
      )
  add_library(expressionutil STATIC ${expressionutil_SRCS})
 -add_dependencies(expressionutil ragel_ExpressionParser)
-+# PATCH
-+# add_dependencies(expressionutil ragel_ExpressionParser)
-+# /PATCH
  
  SET(corpusomatic_SRCS
      ng_corpus_editor.h
-diff -ruN vectorscan-vectorscan-5.4.11/util/ExpressionParser.cpp vectorscan/util/ExpressionParser.cpp
---- vectorscan-vectorscan-5.4.11/util/ExpressionParser.cpp	1969-12-31 19:00:00
-+++ vectorscan/util/ExpressionParser.cpp	2024-03-22 16:24:54
+diff -ruN vectorscan-vectorscan-5.4.11.clean/util/ExpressionParser.cpp vectorscan-vectorscan-5.4.11.dev/util/ExpressionParser.cpp
+--- vectorscan-vectorscan-5.4.11.clean/util/ExpressionParser.cpp	1969-12-31 19:00:00
++++ vectorscan-vectorscan-5.4.11.dev/util/ExpressionParser.cpp	2024-04-12 17:06:39
 @@ -0,0 +1,627 @@
 +
 +#line 1 "util/ExpressionParser.rl"
