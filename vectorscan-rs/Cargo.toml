@@ -24,6 +24,10 @@ cpu_native = ["vectorscan-rs-sys/cpu_native"]
 # Enable all features that can improve speed but break binary portability.
 fast_nonportable = ["cpu_native", "simd_specialization"]
 
+# This feature causes the Vectorscan unit test suite to be built and run at
+# crate build time.
+unit_hyperscan = ["vectorscan-rs-sys/unit_hyperscan"]
+
 [dependencies]
 bitflags = "2.0"
 foreign-types = "0.5"
