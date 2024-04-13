@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: ubuntu-20.04.x86_64.stable.release
+        - name: ubuntu-20.04.x86_64.release
           os: ubuntu-20.04
           rust: stable
           profile: release
@@ -57,7 +57,7 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
           check_docs: false
 
-        - name: ubuntu-22.04.x86_64.stable.test
+        - name: ubuntu-22.04.x86_64.test
           os: ubuntu-22.04
           rust: stable
           profile: test
@@ -66,7 +66,7 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
           check_docs: true
 
-        - name: ubuntu-22.04.x86_64.stable.release.cpu_native
+        - name: ubuntu-22.04.x86_64.release.cpu_native
           os: ubuntu-22.04
           rust: stable
           profile: release
@@ -75,7 +75,7 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
           check_docs: false
 
-        - name: macos-12.x86_64.stable.test
+        - name: macos-12.x86_64.test
           os: macos-12
           rust: stable
           profile: test
@@ -86,7 +86,7 @@ jobs:
 
         # Fails:
         #
-        # - name: macos-12.x86_64.stable.release.cpu_native
+        # - name: macos-12.x86_64.release.cpu_native
         #   os: macos-12
         #   rust: stable
         #   profile: release
@@ -95,7 +95,7 @@ jobs:
         #     brew install coreutils boost
         #   check_docs: false
 
-        - name: macos-13.x86_64.stable.test
+        - name: macos-13.x86_64.test
           os: macos-13
           rust: stable
           profile: test
@@ -104,7 +104,7 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-13.x86_64.stable.release
+        - name: macos-13.x86_64.release
           os: macos-13
           rust: stable
           profile: release
@@ -113,7 +113,16 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-14.arm64.stable.test
+        - name: macos-13.x86_64.release.cpu_native
+          os: macos-13
+          rust: stable
+          profile: release
+          features: unit_hyperscan,cpu_native
+          install_dependencies: |
+            brew install coreutils boost
+          check_docs: false
+
+        - name: macos-14.arm64.test
           os: macos-14  # m1-based macos
           rust: stable
           profile: test
@@ -122,18 +131,27 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-14.arm64.stable.release
+        - name: macos-14.arm64.release
           os: macos-14  # m1-based macos
           rust: stable
           profile: release
           features: unit_hyperscan
+          install_dependencies: |
+            brew install coreutils boost
+          check_docs: false
+
+        - name: macos-14.arm64.release.cpu_native
+          os: macos-14  # m1-based macos
+          rust: stable
+          profile: release
+          features: unit_hyperscan,cpu_native
           install_dependencies: |
             brew install coreutils boost
           check_docs: false
 
         # Fails:
         #
-        # - name: windows-2022.x86_64.stable.test
+        # - name: windows-2022.x86_64.test
         #   os: windows-2022
         #   rust: stable
         #   profile: test
