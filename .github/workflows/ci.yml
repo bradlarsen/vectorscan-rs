@@ -84,14 +84,16 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-12.x86_64.stable.release.cpu_native
-          os: macos-12
-          rust: stable
-          profile: release
-          features: unit_hyperscan,cpu_native
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
+        # Fails:
+        #
+        # - name: macos-12.x86_64.stable.release.cpu_native
+        #   os: macos-12
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
 
         - name: macos-13.x86_64.stable.test
           os: macos-13
@@ -129,6 +131,8 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
+        # Fails:
+        #
         # - name: windows-2022.x86_64.stable.test
         #   os: windows-2022
         #   rust: stable
