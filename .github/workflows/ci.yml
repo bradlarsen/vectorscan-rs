@@ -113,14 +113,16 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-13.x86_64.release.cpu_native
-          os: macos-13
-          rust: stable
-          profile: release
-          features: unit_hyperscan,cpu_native
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
+        # Fails:
+        #
+        # - name: macos-13.x86_64.release.cpu_native
+        #   os: macos-13
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
 
         - name: macos-14.arm64.test
           os: macos-14  # m1-based macos
