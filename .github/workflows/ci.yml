@@ -48,70 +48,118 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: ubuntu-20.04.x86_64.stable.release
+        - name: ubuntu-20.04.x86_64.release
           os: ubuntu-20.04
           rust: stable
           profile: release
-          features:
+          features: unit_hyperscan
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
-
           check_docs: false
-          run_tests: true
 
-        - name: ubuntu-22.04.x86_64.stable.test
+        - name: ubuntu-22.04.x86_64.test
           os: ubuntu-22.04
           rust: stable
           profile: test
-          features:
+          features: unit_hyperscan
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
-
           check_docs: true
-          run_tests: true
 
-        - name: macos-12.x86_64.stable.test
+        - name: ubuntu-22.04.x86_64.release.cpu_native
+          os: ubuntu-22.04
+          rust: stable
+          profile: release
+          features: unit_hyperscan,cpu_native
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+          check_docs: false
+
+        - name: macos-12.x86_64.test
           os: macos-12
           rust: stable
           profile: test
-          features:
+          features: unit_hyperscan
           install_dependencies: |
             brew install coreutils boost
-
           check_docs: false
-          run_tests: true
 
-        - name: macos-13.x86_64.stable.test
+        # Fails:
+        #
+        # - name: macos-12.x86_64.release.cpu_native
+        #   os: macos-12
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+
+        - name: macos-13.x86_64.test
           os: macos-13
           rust: stable
           profile: test
-          features:
+          features: unit_hyperscan
           install_dependencies: |
             brew install coreutils boost
-
           check_docs: false
-          run_tests: true
 
-        - name: macos-14.arm64.stable.test
+        - name: macos-13.x86_64.release
+          os: macos-13
+          rust: stable
+          profile: release
+          features: unit_hyperscan
+          install_dependencies: |
+            brew install coreutils boost
+          check_docs: false
+
+        # Fails:
+        #
+        # - name: macos-13.x86_64.release.cpu_native
+        #   os: macos-13
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+
+        - name: macos-14.arm64.test
           os: macos-14  # m1-based macos
           rust: stable
           profile: test
-          features:
+          features: unit_hyperscan
           install_dependencies: |
             brew install coreutils boost
-
           check_docs: false
-          run_tests: true
 
-        # - name: windows-2022.x86_64.stable.test
+        - name: macos-14.arm64.release
+          os: macos-14  # m1-based macos
+          rust: stable
+          profile: release
+          features: unit_hyperscan
+          install_dependencies: |
+            brew install coreutils boost
+          check_docs: false
+
+        - name: macos-14.arm64.release.cpu_native
+          os: macos-14  # m1-based macos
+          rust: stable
+          profile: release
+          features: unit_hyperscan,cpu_native
+          install_dependencies: |
+            brew install coreutils boost
+          check_docs: false
+
+        # Fails:
+        #
+        # - name: windows-2022.x86_64.test
         #   os: windows-2022
         #   rust: stable
         #   profile: test
-        #   features:
+        #   features: unit_hyperscan
         #   install_dependencies: |
-
         #   check_docs: false
-        #   run_tests: true
 
     steps:
     - uses: actions/checkout@v4
@@ -125,19 +173,21 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
-    - name: Cache
-      uses: Swatinem/rust-cache@v2
-      with:
-        prefix-key: 'ci-tests'
-        key: ${{ matrix.name }}
+    # N.B. cache disabled since certain build configurations end up producing
+    # microarchitecture-specific code that is not portable across CPUs
+    # generally
+
+    # - name: Cache
+    #   uses: Swatinem/rust-cache@v2
+    #   with:
+    #     prefix-key: 'ci-tests'
+    #     key: ${{ matrix.name }}
 
     - name: Build tests
-      if: ${{ matrix.run_tests }}
-      run: cargo test --no-run --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+      run: cargo test --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Run tests
-      if: ${{ matrix.run_tests }}
-      run: cargo test --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+      run: cargo test -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}

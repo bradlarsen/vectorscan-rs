@@ -98,14 +98,20 @@ fn main() {
 
         cfg.profile(profile)
             .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
+            .define("CMAKE_VERBOSE_MAKEFILE", "ON")
             .define("BUILD_SHARED_LIBS", "OFF")
             .define("BUILD_STATIC_LIBS", "ON")
             .define("FAT_RUNTIME", "OFF")
             .define("BUILD_EXAMPLES", "OFF")
             .define("BUILD_BENCHMARKS", "OFF")
-            .define("BUILD_UNIT", "OFF")
             .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF");
+
+        if cfg!(feature = "unit_hyperscan") {
+            cfg.define("BUILD_UNIT", "ON");
+        } else {
+            cfg.define("BUILD_UNIT", "OFF");
+        }
 
         if cfg!(feature = "cpu_native") {
             cfg.define("USE_CPU_NATIVE", "ON");
@@ -180,6 +186,17 @@ fn main() {
         println!("cargo:rustc-link-lib=static=hs");
         println!("cargo:rustc-link-search={}", dst.join("lib").to_str().unwrap());
         println!("cargo:rustc-link-search={}", dst.join("lib64").to_str().unwrap());
+    }
+
+    // Run hyperscan unit test suite
+    #[cfg(feature = "unit_hyperscan")]
+    {
+        let unittests = out_dir.join("build").join("bin").join("unit-hyperscan");
+        match Command::new(unittests).status() {
+            Ok(rc) if rc.success() => {}
+            Ok(rc) => panic!("Failed to run unit tests: exit with code {rc}"),
+            Err(e) => panic!("Failed to run unit tests: {e}"),
+        }
     }
 
     // Run bindgen if needed, or else use the pre-generated bindings

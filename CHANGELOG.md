@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Additions
+
+- A new `unit_hyperscan` feature causes the Vectorscan unit test suite to be built and run at crate build time ([#2](https://github.com/bradlarsen/vectorscan-rs/pulls/2)).
+
 ### Fixes
 
 - The compilation of the vendored version of `vectorscan` no longer uses the `-march=native` C and C++ compiler option when the `cpu_native` feature is not specified ([#1](https://github.com/bradlarsen/vectorscan-rs/pulls/1)).

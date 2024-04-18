@@ -15,7 +15,6 @@ license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
-
 [features]
 # This feature causes `bindgen` to run to produce the raw Rust bindings to Vectorscan.
 gen = ["bindgen"]
@@ -30,6 +29,10 @@ simd_specialization = []
 # microarchitecture of the build system's CPU. The resulting binary will not be
 # portable to CPUs that lack SIMD support that the build system has.
 cpu_native = []
+
+# This feature causes the Vectorscan unit test suite to be built and run at
+# crate build time.
+unit_hyperscan = []
 
 [build-dependencies]
 bindgen = { version = "0.69", optional = true }
