@@ -92,8 +92,8 @@ impl Database {
             c_ids.push(id.unwrap_or(0));
         }
 
-        let mut db = MaybeUninit::uninit();
-        let mut err = MaybeUninit::uninit();
+        let mut db = MaybeUninit::zeroed();
+        let mut err = MaybeUninit::zeroed();
         unsafe {
             hs::hs_compile_ext_multi(
                 c_exprs
@@ -122,8 +122,8 @@ impl Database {
 
     /// Serializes the database using `hs_serialize_database`.
     pub fn serialize(&self) -> Result<SerializedDatabase, Error> {
-        let mut bytes = MaybeUninit::uninit();
-        let mut length = MaybeUninit::uninit();
+        let mut bytes = MaybeUninit::zeroed();
+        let mut length = MaybeUninit::zeroed();
 
         unsafe {
             hs::hs_serialize_database(
@@ -141,7 +141,7 @@ impl Database {
 
     /// Deserializes a database using `hs_deserialize_database`.
     pub fn deserialize(sdb: SerializedDatabase) -> Result<Self, Error> {
-        let mut db_ptr = MaybeUninit::uninit();
+        let mut db_ptr = MaybeUninit::zeroed();
         unsafe {
             hs::hs_deserialize_database(
                 sdb.bytes,
@@ -155,7 +155,7 @@ impl Database {
 
     /// Gets the size of the database in bytes using `hs_database_size`.
     pub fn size(&self) -> Result<usize, Error> {
-        let mut database_size = MaybeUninit::uninit();
+        let mut database_size = MaybeUninit::zeroed();
         unsafe {
             hs::hs_database_size(self.0.as_ptr(), database_size.as_mut_ptr())
                 .ok()
@@ -187,7 +187,7 @@ impl SerializedDatabase {
     /// Gets the size in bytes required to deserialize this database using
     /// `hs_serialized_database_size`.
     pub fn deserialized_size(&self) -> Result<usize, Error> {
-        let mut deserialized_size = MaybeUninit::uninit();
+        let mut deserialized_size = MaybeUninit::zeroed();
         unsafe {
             hs::hs_serialized_database_size(self.bytes, self.length, deserialized_size.as_mut_ptr())
                 .ok()
@@ -209,7 +209,7 @@ impl Drop for SerializedDatabase {
 
 impl Clone for Scratch {
     fn clone(&self) -> Self {
-        let mut scratch = MaybeUninit::uninit();
+        let mut scratch = MaybeUninit::zeroed();
         unsafe {
             hs::hs_clone_scratch(self.0.as_ptr(), scratch.as_mut_ptr())
                 .ok()
@@ -221,7 +221,7 @@ impl Clone for Scratch {
 
 impl Scratch {
     pub fn new(database: &Database) -> Result<Self, Error> {
-        let mut scratch = MaybeUninit::uninit();
+        let mut scratch = MaybeUninit::zeroed();
         unsafe {
             hs::hs_alloc_scratch(database.as_ptr(), scratch.as_mut_ptr())
                 .ok()
@@ -231,7 +231,7 @@ impl Scratch {
 
     /// Gets the size of the scratch in bytes using `hs_scratch_size`.
     pub fn size(&self) -> Result<usize, Error> {
-        let mut scratch_size = MaybeUninit::uninit();
+        let mut scratch_size = MaybeUninit::zeroed();
         unsafe {
             hs::hs_scratch_size(self.0.as_ptr(), scratch_size.as_mut_ptr())
                 .ok()
