@@ -31,5 +31,6 @@ unit_hyperscan = ["vectorscan-rs-sys/unit_hyperscan"]
 [dependencies]
 bitflags = "2.0"
 foreign-types = "0.5"
+libc = "0.2"
 thiserror = "1.0"
 vectorscan-rs-sys = { version = "0.0.2", path = "../vectorscan-rs-sys" }

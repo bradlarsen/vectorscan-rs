@@ -75,6 +75,15 @@ jobs:
             sudo apt-get install zsh libboost-all-dev
           check_docs: false
 
+        - name: ubuntu-24.04.x86_64.test
+          os: ubuntu-24.04
+          rust: stable
+          profile: test
+          features: unit_hyperscan
+          install_dependencies: |
+            sudo apt-get install zsh libboost-all-dev
+          check_docs: true
+
         - name: macos-12.x86_64.test
           os: macos-12
           rust: stable
@@ -84,7 +93,7 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        # Fails:
+        # Fails with `unknown target CPU 'x86_64_v2'`:
         #
         # - name: macos-12.x86_64.release.cpu_native
         #   os: macos-12
@@ -113,7 +122,7 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        # Fails:
+        # Fails with `unknown target CPU 'x86_64_v2'`:
         #
         # - name: macos-13.x86_64.release.cpu_native
         #   os: macos-13

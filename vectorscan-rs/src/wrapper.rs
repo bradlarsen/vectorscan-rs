@@ -5,17 +5,20 @@ use std::{ffi::CString, mem::MaybeUninit, ptr};
 use vectorscan_rs_sys as hs;
 
 foreign_type! {
-    unsafe type CompileError {
+    #[derive(Debug)]
+    unsafe type CompileError: Send + Sync {
         type CType = hs::hs_compile_error_t;
         fn drop = compile_error_drop;
     }
 
+    #[derive(Debug)]
     pub unsafe type Database: Send + Sync {
         type CType = hs::hs_database_t;
         fn drop = database_drop;
     }
 
-    pub unsafe type Scratch {
+    #[derive(Debug)]
+    pub unsafe type Scratch: Send + Sync {
         type CType = hs::hs_scratch_t;
         fn drop = scratch_drop;
     }
@@ -43,7 +46,7 @@ unsafe fn compile_error_drop(v: *mut hs::hs_compile_error_t) {
 }
 
 bitflags! {
-    #[derive(Default, Clone, Copy)]
+    #[derive(Default, Clone, Copy, PartialEq, Eq, Debug)]
     pub struct Flag: u32 {
         const CASELESS = hs::HS_FLAG_CASELESS;
         const DOTALL = hs::HS_FLAG_DOTALL;
@@ -59,6 +62,7 @@ bitflags! {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Pattern {
     expression: Vec<u8>,
     flags: Flag,
@@ -86,15 +90,13 @@ impl Database {
             id,
         } in patterns
         {
-            // have to keep the original strings until the db is created
-            let c_expr = CString::new(expression)?;
-            c_exprs.push(c_expr);
+            c_exprs.push(CString::new(expression)?);
             c_flags.push(flags.bits());
             c_ids.push(id.unwrap_or(0));
         }
 
-        let mut db = MaybeUninit::uninit();
-        let mut err = MaybeUninit::uninit();
+        let mut db = MaybeUninit::zeroed();
+        let mut err = MaybeUninit::zeroed();
         unsafe {
             hs::hs_compile_ext_multi(
                 c_exprs
@@ -112,11 +114,110 @@ impl Database {
                 err.as_mut_ptr(),
             )
             .ok()
-            .map_err(|_| {
+            .map_err(|_e| {
+                // The details of error value `_e` are stored in `err`; convert that and ignore `_e`
                 let err = CompileError::from_ptr(err.assume_init());
                 Error::HyperscanCompile(err.message(), err.expression())
             })?;
             Ok(Database::from_ptr(db.assume_init()))
+        }
+    }
+
+    /// Serializes the database using `hs_serialize_database`.
+    pub fn serialize(&self) -> Result<SerializedDatabase, Error> {
+        let mut bytes = MaybeUninit::zeroed();
+        let mut length = MaybeUninit::zeroed();
+
+        unsafe {
+            hs::hs_serialize_database(
+                self.0.as_ptr(),
+                bytes.as_mut_ptr(),
+                length.as_mut_ptr(),
+            )
+            .ok()
+            .map(|()| SerializedDatabase {
+                bytes: bytes.assume_init(),
+                length: length.assume_init(),
+            })
+        }
+    }
+
+    /// Deserializes a database using `hs_deserialize_database`.
+    pub fn deserialize(sdb: SerializedDatabase) -> Result<Self, Error> {
+        let mut db_ptr = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_deserialize_database(
+                sdb.bytes,
+                sdb.length,
+                db_ptr.as_mut_ptr(),
+            )
+            .ok()
+            .map(|()| Database::from_ptr(db_ptr.assume_init()))
+        }
+    }
+
+    /// Gets the size of the database in bytes using `hs_database_size`.
+    pub fn size(&self) -> Result<usize, Error> {
+        let mut database_size = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_database_size(self.0.as_ptr(), database_size.as_mut_ptr())
+                .ok()
+                .map(|()| database_size.assume_init())
+        }
+    }
+}
+
+/// Creates a deep copy of the database via serialization followed by deserialization.
+impl Clone for Database {
+    fn clone(&self) -> Self {
+        self.serialize().unwrap().deserialize().unwrap()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct SerializedDatabase {
+    bytes: *mut std::os::raw::c_char,
+    length: usize,
+}
+
+impl SerializedDatabase {
+    #[inline]
+    pub fn deserialize(self) -> Result<Database, Error> {
+        Database::deserialize(self)
+    }
+
+    /// Gets the size in bytes required to deserialize this database using
+    /// `hs_serialized_database_size`.
+    pub fn deserialized_size(&self) -> Result<usize, Error> {
+        let mut deserialized_size = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_serialized_database_size(self.bytes, self.length, deserialized_size.as_mut_ptr())
+                .ok()
+                .map(|()| deserialized_size.assume_init())
+        }
+    }
+}
+
+impl Drop for SerializedDatabase {
+    fn drop(&mut self) {
+        // XXX should technically call the deallocator function set in `hs_set_misc_allocator`,
+        // but we never call that here, and the defaults are malloc/free
+        unsafe {
+            libc::free(self.bytes as *mut libc::c_void);
+        }
+    }
+}
+
+
+impl Clone for Scratch {
+    fn clone(&self) -> Self {
+        let mut scratch = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_clone_scratch(self.0.as_ptr(), scratch.as_mut_ptr())
+                .ok()
+                .map(|()| Scratch::from_ptr(scratch.assume_init()))
+                .unwrap()
         }
     }
 }
@@ -127,7 +228,17 @@ impl Scratch {
         unsafe {
             hs::hs_alloc_scratch(database.as_ptr(), scratch.as_mut_ptr())
                 .ok()
-                .map(|_| Scratch::from_ptr(scratch.assume_init()))
+                .map(|()| Scratch::from_ptr(scratch.assume_init()))
+        }
+    }
+
+    /// Gets the size of the scratch in bytes using `hs_scratch_size`.
+    pub fn size(&self) -> Result<usize, Error> {
+        let mut scratch_size = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_scratch_size(self.0.as_ptr(), scratch_size.as_mut_ptr())
+                .ok()
+                .map(|()| scratch_size.assume_init())
         }
     }
 }
@@ -149,6 +260,7 @@ impl CompileError {
 }
 
 bitflags! {
+    #[derive(Default, Clone, Copy, PartialEq, Eq, Debug)]
     pub struct ScanMode: u32 {
         const BLOCK = hs::HS_MODE_BLOCK;
         const VECTORED = hs::HS_MODE_VECTORED;
