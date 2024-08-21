@@ -93,14 +93,16 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: macos-12.x86_64.release.cpu_native
-          os: macos-12
-          rust: stable
-          profile: release
-          features: unit_hyperscan,cpu_native
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
+        # Fails with `unknown target CPU 'x86_64_v2'`:
+        #
+        # - name: macos-12.x86_64.release.cpu_native
+        #   os: macos-12
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
 
         - name: macos-13.x86_64.test
           os: macos-13
