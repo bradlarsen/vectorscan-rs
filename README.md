@@ -21,3 +21,5 @@ This project is licensed under either of
   ([LICENSE-MIT](LICENSE-MIT))
 
 at your option.
+
+This project also includes a vendored copy of Vectorscan, which is distributed under the BSD license ([LICENSE-VECTORSCAN](LICENSE-VECTORSCAN)).
