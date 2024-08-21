@@ -160,14 +160,6 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        - name: windows-2022.x86_64.test
-          os: windows-2022
-          rust: stable
-          profile: test
-          features: unit_hyperscan
-          install_dependencies:
-          check_docs: false
-
     steps:
     - uses: actions/checkout@v4
 
@@ -189,6 +181,64 @@ jobs:
     #   with:
     #     prefix-key: 'ci-tests'
     #     key: ${{ matrix.name }}
+
+    - name: Build tests
+      run: cargo test --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+
+    - name: Run tests
+      run: cargo test -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+
+    - name: Check documentation
+      if: ${{ matrix.check_docs }}
+      env:
+        RUSTDOCFLAGS: -D warnings
+      run: cargo doc --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings --no-deps --document-private-items
+
+    # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
+    - name: Upload build timings
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-timings.${{ matrix.name }}
+        path: target/cargo-timings
+        if-no-files-found: error
+
+
+  windows_tests:
+    name: CI (${{ matrix.name }})
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+        - name: windows-2022.x86_64.test
+          os: windows-2022
+          rust: stable
+          profile: test
+          features: unit_hyperscan
+          install_dependencies: |
+            aria2c `
+              "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.7z" `
+              -d "${{ runner.temp }}" `
+              -o "boost.7z"
+            7z x "${{ runner.temp }}/boost.7z" -o"${{ github.workspace }}/.."
+            move "${{ github.workspace }}/../boost_*" "${{ github.workspace }}/../boost"
+          check_docs: false
+
+    env:
+      BOOST_ROOT: "${{ github.workspace }}/../boost"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: ${{ matrix.install_dependencies }}
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
 
     - name: Build tests
       run: cargo test --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
