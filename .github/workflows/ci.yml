@@ -160,15 +160,13 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
-        # Fails:
-        #
-        # - name: windows-2022.x86_64.test
-        #   os: windows-2022
-        #   rust: stable
-        #   profile: test
-        #   features: unit_hyperscan
-        #   install_dependencies: |
-        #   check_docs: false
+        - name: windows-2022.x86_64.test
+          os: windows-2022
+          rust: stable
+          profile: test
+          features: unit_hyperscan
+          install_dependencies:
+          check_docs: false
 
     steps:
     - uses: actions/checkout@v4
