@@ -5,16 +5,19 @@ use std::{ffi::CString, mem::MaybeUninit, ptr};
 use vectorscan_rs_sys as hs;
 
 foreign_type! {
+    #[derive(Debug)]
     unsafe type CompileError: Send + Sync {
         type CType = hs::hs_compile_error_t;
         fn drop = compile_error_drop;
     }
 
+    #[derive(Debug)]
     pub unsafe type Database: Send + Sync {
         type CType = hs::hs_database_t;
         fn drop = database_drop;
     }
 
+    #[derive(Debug)]
     pub unsafe type Scratch: Send + Sync {
         type CType = hs::hs_scratch_t;
         fn drop = scratch_drop;

@@ -9,12 +9,12 @@ pub enum Scan {
     Terminate,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BlockDatabase {
     db: wrapper::Database,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BlockScanner<'db> {
     scratch: wrapper::Scratch,
     database: &'db wrapper::Database,
