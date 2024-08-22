@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## Unreleased
+## [v0.0.3](https://github.com/bradlarsen/vectorscan-rs/releases/v0.0.3) (2024-08-21)
 
 ### Additions
 - Several additional Hyperscan functions are exposed, and exposed types implement more traits ([#3](https://github.com/bradlarsen/vectorscan-rs/pull/3)).
