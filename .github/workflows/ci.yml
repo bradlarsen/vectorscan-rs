@@ -131,6 +131,16 @@ jobs:
             brew install coreutils boost
           check_docs: false
 
+        # A build that runs with `bindgen` enabled
+        - name: macos-14.arm64.gen.release
+          os: macos-14  # m1-based macos
+          rust: stable
+          profile: release
+          features: unit_hyperscan,gen
+          install_dependencies: |
+            brew install coreutils boost libclang1
+          check_docs: false
+
         - name: macos-14.arm64.release.cpu_native
           os: macos-14  # m1-based macos
           rust: stable
