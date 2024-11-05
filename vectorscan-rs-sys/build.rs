@@ -102,6 +102,7 @@ fn main() {
             .define("BUILD_SHARED_LIBS", "OFF")
             .define("BUILD_STATIC_LIBS", "ON")
             .define("FAT_RUNTIME", "OFF")
+            .define("WARNINGS_AS_ERRORS", "OFF")
             .define("BUILD_EXAMPLES", "OFF")
             .define("BUILD_BENCHMARKS", "OFF")
             .define("BUILD_DOC", "OFF")
