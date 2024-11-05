@@ -129,16 +129,12 @@ impl Database {
         let mut length = MaybeUninit::zeroed();
 
         unsafe {
-            hs::hs_serialize_database(
-                self.0.as_ptr(),
-                bytes.as_mut_ptr(),
-                length.as_mut_ptr(),
-            )
-            .ok()
-            .map(|()| SerializedDatabase {
-                bytes: bytes.assume_init(),
-                length: length.assume_init(),
-            })
+            hs::hs_serialize_database(self.0.as_ptr(), bytes.as_mut_ptr(), length.as_mut_ptr())
+                .ok()
+                .map(|()| SerializedDatabase {
+                    bytes: bytes.assume_init(),
+                    length: length.assume_init(),
+                })
         }
     }
 
@@ -146,13 +142,9 @@ impl Database {
     pub fn deserialize(sdb: SerializedDatabase) -> Result<Self, Error> {
         let mut db_ptr = MaybeUninit::zeroed();
         unsafe {
-            hs::hs_deserialize_database(
-                sdb.bytes,
-                sdb.length,
-                db_ptr.as_mut_ptr(),
-            )
-            .ok()
-            .map(|()| Database::from_ptr(db_ptr.assume_init()))
+            hs::hs_deserialize_database(sdb.bytes, sdb.length, db_ptr.as_mut_ptr())
+                .ok()
+                .map(|()| Database::from_ptr(db_ptr.assume_init()))
         }
     }
 
@@ -165,6 +157,16 @@ impl Database {
                 .map(|()| database_size.assume_init())
         }
     }
+
+    /// Gets the required size in bytes for a stream for the database using `hs_stream_size`.
+    pub fn stream_size(&self) -> Result<usize, Error> {
+        let mut stream_size = MaybeUninit::zeroed();
+        unsafe {
+            hs::hs_stream_size(self.0.as_ptr(), stream_size.as_mut_ptr())
+                .ok()
+                .map(|()| stream_size.assume_init())
+        }
+    }
 }
 
 /// Creates a deep copy of the database via serialization followed by deserialization.
@@ -173,7 +175,6 @@ impl Clone for Database {
         self.serialize().unwrap().deserialize().unwrap()
     }
 }
-
 
 #[derive(Debug)]
 pub struct SerializedDatabase {
@@ -208,7 +209,6 @@ impl Drop for SerializedDatabase {
         }
     }
 }
-
 
 impl Clone for Scratch {
     fn clone(&self) -> Self {
