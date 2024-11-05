@@ -138,7 +138,7 @@ jobs:
           profile: release
           features: unit_hyperscan,gen
           install_dependencies: |
-            brew install coreutils boost libclang1
+            brew install coreutils boost
           check_docs: false
 
         - name: macos-14.arm64.release.cpu_native
