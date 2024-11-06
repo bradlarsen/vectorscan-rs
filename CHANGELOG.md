@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Additions
-- The streaming APIs are now exposed.
+- The streaming APIs are now exposed ([#5](https://github.com/bradlarsen/vectorscan-rs/pull/5)).
 
-- Documentation has been added for many of the Rust APIs.
+- Documentation has been added for many of the Rust APIs ([#5](https://github.com/bradlarsen/vectorscan-rs/pull/5)).
 
 ### Fixes
 - Debug builds are fixed on macOS using Xcode 15.
