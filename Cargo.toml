@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.package]
 
-version = "0.0.3"
+version = "0.0.4-dev"
 
 license = "Apache-2.0 OR MIT"
 authors = ["Brad Larsen <brad@bradfordlarsen.com>"]
