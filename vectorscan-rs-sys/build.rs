@@ -68,7 +68,10 @@ fn main() {
         eprintln!("Tarball extracted to {}", out_dir.display());
     }
 
-    eprintln!("Vectorscan source directory is at {}", vectorscan_src_dir.display());
+    eprintln!(
+        "Vectorscan source directory is at {}",
+        vectorscan_src_dir.display()
+    );
 
     // Patch release tarball
     {
@@ -80,7 +83,10 @@ fn main() {
             .output()
             .expect("Failed to apply patchfile");
         assert!(output.status.success());
-        eprintln!("Successfully applied patches to Vectorscan source directory at {}", vectorscan_src_dir.display());
+        eprintln!(
+            "Successfully applied patches to Vectorscan source directory at {}",
+            vectorscan_src_dir.display()
+        );
     }
 
     // Build with cmake
@@ -185,8 +191,14 @@ fn main() {
         let dst = cfg.build();
 
         println!("cargo:rustc-link-lib=static=hs");
-        println!("cargo:rustc-link-search={}", dst.join("lib").to_str().unwrap());
-        println!("cargo:rustc-link-search={}", dst.join("lib64").to_str().unwrap());
+        println!(
+            "cargo:rustc-link-search={}",
+            dst.join("lib").to_str().unwrap()
+        );
+        println!(
+            "cargo:rustc-link-search={}",
+            dst.join("lib64").to_str().unwrap()
+        );
     }
 
     // Run hyperscan unit test suite

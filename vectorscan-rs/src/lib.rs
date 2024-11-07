@@ -12,9 +12,7 @@ mod tests {
 
     #[test]
     fn block_scanning_basic() -> Result<(), Error> {
-        let patterns = vec![
-            Pattern::new(b"hello".to_vec(), Flag::default(), None),
-        ];
+        let patterns = vec![Pattern::new(b"hello".to_vec(), Flag::default(), None)];
         let db = BlockDatabase::new(patterns)?;
         let mut scanner = BlockScanner::new(&db)?;
 
@@ -40,9 +38,7 @@ mod tests {
 
     #[test]
     fn stream_scanning_basic() -> Result<(), Error> {
-        let patterns = vec![
-            Pattern::new(b"hello".to_vec(), Flag::default(), None),
-        ];
+        let patterns = vec![Pattern::new(b"hello".to_vec(), Flag::default(), None)];
         let db = StreamingDatabase::new(patterns)?;
         let mut scanner = StreamingScanner::new(&db)?;
 
@@ -92,9 +88,7 @@ mod tests {
 
     #[test]
     fn clone_database() -> Result<(), Error> {
-        let patterns = vec![
-            Pattern::new(b"hello".to_vec(), Flag::default(), None),
-        ];
+        let patterns = vec![Pattern::new(b"hello".to_vec(), Flag::default(), None)];
 
         let db = wrapper::Database::new(patterns, ScanMode::BLOCK)?;
         let _dbs: Vec<wrapper::Database> = (0..100).map(|_| db.clone()).collect();
@@ -104,9 +98,7 @@ mod tests {
 
     #[test]
     fn database_size() -> Result<(), Error> {
-        let patterns = vec![
-            Pattern::new(b"hello".to_vec(), Flag::default(), None),
-        ];
+        let patterns = vec![Pattern::new(b"hello".to_vec(), Flag::default(), None)];
 
         let db = wrapper::Database::new(patterns, ScanMode::BLOCK)?;
         let db_size = db.size()?;

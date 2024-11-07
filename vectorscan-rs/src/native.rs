@@ -176,12 +176,15 @@ impl<'db> StreamingScanner<'db> {
 
     /// Open a new `Stream` object using `hs_open_stream`
     pub fn open_stream(&self) -> Result<StreamScanner<'_>, Error> {
-        let stream = Stream::new(&self.db)?;
-        Ok(StreamScanner { stream, scanner: &self })
+        let stream = Stream::new(self.db)?;
+        Ok(StreamScanner {
+            stream,
+            scanner: self,
+        })
     }
 }
 
-impl <'ss> StreamScanner<'ss> {
+impl<'ss> StreamScanner<'ss> {
     /// Close the given `Stream` object using `hs_close_stream`.
     pub fn close<F>(self, on_match: F) -> Result<Scan, Error>
     where
