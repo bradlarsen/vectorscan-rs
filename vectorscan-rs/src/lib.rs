@@ -132,4 +132,91 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_pattern_with_flags() -> Result<(), Error> {
+        let patterns = vec![
+            Pattern::new(b"HELLO".to_vec(), Flag::CASELESS, Some(0)),
+            Pattern::new(
+                b"w[o0]rld".to_vec(),
+                Flag::CASELESS | Flag::SOM_LEFTMOST,
+                Some(1),
+            ),
+        ];
+        let db = BlockDatabase::new(patterns)?;
+        let mut scanner = BlockScanner::new(&db)?;
+
+        let mut matches = Vec::new();
+        scanner.scan(b"hello W0RLD", |id, from, to, flags| {
+            matches.push((id, from, to, flags));
+            Scan::Continue
+        })?;
+
+        assert_eq!(matches.len(), 2);
+        assert_eq!(matches[0], (0, 0, 5, 0)); // matches "hello"
+        assert_eq!(matches[1], (1, 6, 11, 0)); // matches "W0RLD"
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_early_termination() -> Result<(), Error> {
+        let patterns = vec![
+            Pattern::new(b"test".to_vec(), Flag::default(), None),
+            Pattern::new(b"pattern".to_vec(), Flag::default(), None),
+        ];
+        let db = BlockDatabase::new(patterns)?;
+        let mut scanner = BlockScanner::new(&db)?;
+
+        let mut match_count = 0;
+        scanner.scan(b"test pattern test pattern", |_id, _from, _to, _flags| {
+            match_count += 1;
+            Scan::Continue
+        })?;
+        assert_eq!(match_count, 4);
+
+        let mut match_count = 0;
+        scanner.scan(b"test pattern test pattern", |_id, _from, _to, _flags| {
+            match_count += 1;
+            if match_count >= 2 {
+                Scan::Terminate
+            } else {
+                Scan::Continue
+            }
+        })?;
+
+        assert_eq!(match_count, 2); // Should stop after 2 matches
+        Ok(())
+    }
+
+    #[test]
+    fn test_pattern_compilation_errors() -> Result<(), Error> {
+        // Test invalid regex syntax
+        let result = BlockDatabase::new(vec![Pattern::new(b"[".to_vec(), Flag::default(), None)]);
+        let err = result.expect_err("Expected error but got success");
+        assert!(matches!(err, Error::HyperscanCompile(..)));
+
+        // Test unsupported regex features
+        let result = BlockDatabase::new(vec![
+            Pattern::new(b"(?R)".to_vec(), Flag::default(), None), // Recursive patterns not supported
+        ]);
+        let err = result.expect_err("Expected error but got success");
+        assert!(matches!(err, Error::HyperscanCompile(..)));
+
+        // Test empty pattern
+        let result = BlockDatabase::new(vec![Pattern::new(b"".to_vec(), Flag::default(), None)]);
+        let err = result.expect_err("Expected error but got success");
+        assert!(matches!(err, Error::HyperscanCompile(..)));
+
+        // Test pattern with null bytes
+        let result = BlockDatabase::new(vec![Pattern::new(
+            b"test\0pattern".to_vec(),
+            Flag::default(),
+            None,
+        )]);
+        let err = result.expect_err("Expected error but got success");
+        assert!(matches!(err, Error::Nul(_)));
+
+        Ok(())
+    }
 }
