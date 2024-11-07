@@ -4,7 +4,7 @@ use vectorscan_rs_sys as ffi;
 /// Hyperscan Error Codes
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Pattern expression contains NULL byte")]
+    #[error("Pattern expression contains NUL byte")]
     Nul(#[from] std::ffi::NulError),
 
     #[error("Error originating from Hyperscan API")]
