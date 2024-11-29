@@ -56,6 +56,7 @@ jobs:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
           check_docs: false
+          use_ninja: false
 
         - name: ubuntu-22.04.x86_64.test
           os: ubuntu-22.04
@@ -65,6 +66,7 @@ jobs:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
           check_docs: true
+          use_ninja: false
 
         - name: ubuntu-22.04.x86_64.release.cpu_native
           os: ubuntu-22.04
@@ -74,6 +76,7 @@ jobs:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
           check_docs: false
+          use_ninja: false
 
         - name: ubuntu-24.04.x86_64.test
           os: ubuntu-24.04
@@ -83,6 +86,7 @@ jobs:
           install_dependencies: |
             sudo apt-get install zsh libboost-all-dev
           check_docs: true
+          use_ninja: false
 
         - name: macos-13.x86_64.test
           os: macos-13
@@ -90,8 +94,9 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            brew install coreutils boost
+            brew install coreutils boost ninja
           check_docs: false
+          use_ninja: true
 
         - name: macos-13.x86_64.release
           os: macos-13
@@ -101,6 +106,7 @@ jobs:
           install_dependencies: |
             brew install coreutils boost
           check_docs: false
+          use_ninja: false
 
         # Fails with `unknown target CPU 'x86_64_v2'`:
         #
@@ -110,8 +116,9 @@ jobs:
         #   profile: release
         #   features: unit_hyperscan,cpu_native
         #   install_dependencies: |
-        #     brew install coreutils boost
+        #     brew install coreutils boost ninja
         #   check_docs: false
+        #   use_ninja: true
 
         - name: macos-14.arm64.test
           os: macos-14  # m1-based macos
@@ -119,8 +126,9 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            brew install coreutils boost
+            brew install coreutils boost ninja
           check_docs: false
+          use_ninja: true
 
         - name: macos-14.arm64.release
           os: macos-14  # m1-based macos
@@ -128,8 +136,9 @@ jobs:
           profile: release
           features: unit_hyperscan
           install_dependencies: |
-            brew install coreutils boost
+            brew install coreutils boost ninja
           check_docs: false
+          use_ninja: true
 
         # A build that runs with `bindgen` enabled
         - name: macos-14.arm64.gen.release
@@ -138,8 +147,9 @@ jobs:
           profile: release
           features: unit_hyperscan,gen
           install_dependencies: |
-            brew install coreutils boost
+            brew install coreutils boost ninja
           check_docs: false
+          use_ninja: true
 
         - name: macos-14.arm64.release.cpu_native
           os: macos-14  # m1-based macos
@@ -147,8 +157,9 @@ jobs:
           profile: release
           features: unit_hyperscan,cpu_native
           install_dependencies: |
-            brew install coreutils boost
+            brew install coreutils boost ninja
           check_docs: false
+          use_ninja: true
 
         # Fails:
         #
@@ -159,6 +170,10 @@ jobs:
         #   features: unit_hyperscan
         #   install_dependencies: |
         #   check_docs: false
+        #   use_ninja: false
+
+    env:
+      CMAKE_GENERATOR: ${{ (matrix.use_ninja && "Ninja") || "Unix Makefiles" }}
 
     steps:
     - uses: actions/checkout@v4
