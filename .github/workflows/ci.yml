@@ -173,7 +173,7 @@ jobs:
         #   use_ninja: false
 
     env:
-      CMAKE_GENERATOR: ${{ (matrix.use_ninja && "Ninja") || "Unix Makefiles" }}
+      CMAKE_GENERATOR: ${{ (matrix.use_ninja && 'Ninja') || 'Unix Makefiles' }}
 
     steps:
     - uses: actions/checkout@v4
