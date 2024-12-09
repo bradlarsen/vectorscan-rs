@@ -38,6 +38,11 @@ impl BlockDatabase {
     pub fn create_scanner(&self) -> Result<BlockScanner, Error> {
         BlockScanner::new(self)
     }
+
+    /// Get the size in bytes of the database
+    pub fn size(&self) -> Result<usize, Error> {
+        self.inner.size()
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -123,6 +128,16 @@ impl StreamingDatabase {
     /// Create a new scanner from this database
     pub fn create_scanner(&self) -> Result<StreamingScanner, Error> {
         StreamingScanner::new(self)
+    }
+
+    /// Get the size in bytes of the database
+    pub fn size(&self) -> Result<usize, Error> {
+        self.inner.size()
+    }
+
+    /// Get the size in bytes of a stream for this database database
+    pub fn stream_size(&self) -> Result<usize, Error> {
+        self.inner.stream_size()
     }
 }
 

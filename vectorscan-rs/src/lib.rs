@@ -33,6 +33,8 @@ mod tests {
         drop(scanner);
         test_basic(&mut scanner2)?;
 
+        assert_eq!(db.size()?, 936); // N.B. this value may change if the vectorscan code changes
+
         Ok(())
     }
 
@@ -66,6 +68,9 @@ mod tests {
                 Scan::Continue
             })?;
             assert_eq!(matches.as_slice(), expected);
+
+            assert_eq!(db.size()?, 936); // N.B. this value may change if the vectorscan code changes
+            assert_eq!(db.stream_size()?, 22); // N.B. this value may change if the vectorscan code changes
 
             Ok(())
         };
