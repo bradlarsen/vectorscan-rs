@@ -1,3 +1,6 @@
+//! Vectorscan is a fork of [Hyperscan](https://github.com/Intel/hyperscan) that supports additional platforms.
+//! To understand how to use this library, it may be helpful to look at the [documentation for the Hyperscan C bindings](https://intel.github.io/hyperscan/dev-reference/).
+
 mod error;
 mod native;
 mod wrapper;
