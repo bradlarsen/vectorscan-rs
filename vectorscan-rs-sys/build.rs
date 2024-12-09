@@ -91,6 +91,21 @@ fn main() {
 
     // Build with cmake
     {
+        let mut cfg = cmake::Config::new(&vectorscan_src_dir);
+
+        macro_rules! cfg_define_feature {
+            ($cmake_feature: tt, $cargo_feature: tt) => {
+                cfg.define(
+                    $cmake_feature,
+                    if cfg!(feature = $cargo_feature) {
+                        "ON"
+                    } else {
+                        "OFF"
+                    },
+                )
+            };
+        }
+
         let profile = {
             // See https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level for possible values
             match env("OPT_LEVEL").as_str() {
@@ -99,8 +114,6 @@ fn main() {
                 _ => "Release",
             }
         };
-
-        let mut cfg = cmake::Config::new(&vectorscan_src_dir);
 
         cfg.profile(profile)
             .define("CMAKE_INSTALL_INCLUDEDIR", &include_dir)
@@ -114,17 +127,9 @@ fn main() {
             .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF");
 
-        if cfg!(feature = "unit_hyperscan") {
-            cfg.define("BUILD_UNIT", "ON");
-        } else {
-            cfg.define("BUILD_UNIT", "OFF");
-        }
+        cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
+        cfg_define_feature!("USE_CPU_NAIVE", "cpu_native");
 
-        if cfg!(feature = "cpu_native") {
-            cfg.define("USE_CPU_NATIVE", "ON");
-        } else {
-            cfg.define("USE_CPU_NATIVE", "OFF");
-        }
 
         // NOTE: Several Vectorscan feature flags can be set based on available CPU SIMD features.
         // Enabling these according to availability on the build system CPU is fragile, however:
@@ -143,30 +148,26 @@ fn main() {
             macro_rules! x86_64_feature {
                 ($feature: tt) => {{
                     #[cfg(target_arch = "x86_64")]
-                    let enabled = std::arch::is_x86_feature_detected!($feature);
-                    #[cfg(not(target_arch = "x86_64"))]
-                    let enabled = false;
-
-                    if enabled {
+                    if std::arch::is_x86_feature_detected!($feature) {
                         "ON"
                     } else {
                         "OFF"
-                    }
+                    };
+                    #[cfg(not(target_arch = "x86_64"))]
+                    "OFF"
                 }};
             }
 
             macro_rules! aarch64_feature {
                 ($feature: tt) => {{
                     #[cfg(target_arch = "aarch64")]
-                    let enabled = std::arch::is_aarch64_feature_detected!($feature);
-                    #[cfg(not(target_arch = "aarch64"))]
-                    let enabled = false;
-
-                    if enabled {
+                    if std::arch::is_aarch64_feature_detected!($feature) {
                         "ON"
                     } else {
                         "OFF"
                     }
+                    #[cfg(not(target_arch = "aarch64"))]
+                    "OFF"
                 }};
             }
 
@@ -191,14 +192,8 @@ fn main() {
         let dst = cfg.build();
 
         println!("cargo:rustc-link-lib=static=hs");
-        println!(
-            "cargo:rustc-link-search={}",
-            dst.join("lib").to_str().unwrap()
-        );
-        println!(
-            "cargo:rustc-link-search={}",
-            dst.join("lib64").to_str().unwrap()
-        );
+        println!("cargo:rustc-link-search={}", dst.join("lib").display());
+        println!("cargo:rustc-link-search={}", dst.join("lib64").display());
     }
 
     // Run hyperscan unit test suite
