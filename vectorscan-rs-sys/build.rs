@@ -130,6 +130,9 @@ fn main() {
         cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
         cfg_define_feature!("USE_CPU_NAIVE", "cpu_native");
 
+        if cfg!(feature = "asan") {
+            cfg.define("SANITIZE", "address");
+        }
 
         // NOTE: Several Vectorscan feature flags can be set based on available CPU SIMD features.
         // Enabling these according to availability on the build system CPU is fragile, however:

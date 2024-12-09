@@ -34,6 +34,9 @@ cpu_native = []
 # crate build time.
 unit_hyperscan = []
 
+# This feature causes Vectorscan to build with address sanitizer enabled.
+asan = []
+
 [build-dependencies]
 bindgen = { version = "0.70", optional = true }
 cmake = "0.1"
