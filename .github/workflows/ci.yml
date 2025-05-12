@@ -167,7 +167,7 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            choco install mingw
+            vcpkg install boost
           check_docs: false
           cmake_generator: 'Visual Studio 17 2022'
 
