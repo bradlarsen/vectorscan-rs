@@ -56,7 +56,7 @@ jobs:
         #   install_dependencies: |
         #     sudo apt-get install zsh libboost-all-dev
         #   check_docs: false
-        #   use_ninja: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # - name: ubuntu-22.04.x86_64.test
         #   os: ubuntu-22.04
@@ -66,7 +66,7 @@ jobs:
         #   install_dependencies: |
         #     sudo apt-get install zsh libboost-all-dev
         #   check_docs: true
-        #   use_ninja: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # - name: ubuntu-22.04.x86_64.release.cpu_native
         #   os: ubuntu-22.04
@@ -76,7 +76,7 @@ jobs:
         #   install_dependencies: |
         #     sudo apt-get install zsh libboost-all-dev
         #   check_docs: false
-        #   use_ninja: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # - name: ubuntu-24.04.x86_64.test
         #   os: ubuntu-24.04
@@ -86,7 +86,7 @@ jobs:
         #   install_dependencies: |
         #     sudo apt-get install zsh libboost-all-dev
         #   check_docs: true
-        #   use_ninja: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # - name: macos-13.x86_64.test
         #   os: macos-13
@@ -96,7 +96,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         # - name: macos-13.x86_64.release
         #   os: macos-13
@@ -106,7 +106,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # Fails with `unknown target CPU 'x86_64_v2'`:
         #
@@ -118,7 +118,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost ninja
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         # - name: macos-14.arm64.test
         #   os: macos-14  # m1-based macos
@@ -128,7 +128,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         # - name: macos-14.arm64.release
         #   os: macos-14  # m1-based macos
@@ -138,7 +138,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         # # A build that runs with `bindgen` enabled
         # - name: macos-14.arm64.gen.release
@@ -149,7 +149,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         # - name: macos-14.arm64.release.cpu_native
         #   os: macos-14  # m1-based macos
@@ -159,7 +159,7 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
         - name: windows-2025.x86_64.test
           os: windows-2025
@@ -169,10 +169,10 @@ jobs:
           install_dependencies: |
             choco install mingw
           check_docs: false
-          use_ninja: false
+          cmake_generator: 'Visual Studio 17 2022'
 
     env:
-      CMAKE_GENERATOR: ${{ (matrix.use_ninja && 'Ninja') || 'Unix Makefiles' }}
+      CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
 
     steps:
     - uses: actions/checkout@v4
