@@ -168,7 +168,7 @@ jobs:
           features: unit_hyperscan
           install_dependencies: |
             aria2c https://archives.boost.io/release/1.88.0/source/boost_1_88_0.7z
-            7z x boost_1_88_0.zip
+            7z x boost_1_88_0.7z
           check_docs: false
           cmake_generator: 'Ninja'
 
