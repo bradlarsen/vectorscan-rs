@@ -167,9 +167,10 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            vcpkg install boost
+            aria2c https://archives.boost.io/release/1.88.0/source/boost_1_88_0.7z
+            7z x boost_1_88_0.zip
           check_docs: false
-          cmake_generator: 'Visual Studio 17 2022'
+          cmake_generator: 'Ninja'
 
     env:
       CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
