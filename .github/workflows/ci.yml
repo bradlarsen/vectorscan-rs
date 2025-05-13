@@ -173,9 +173,6 @@ jobs:
           check_docs: false
           # cmake_generator: 'MinGW Makefiles'
 
-    env:
-      # CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
-
     steps:
     - uses: actions/checkout@v4
       with:
