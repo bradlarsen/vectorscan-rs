@@ -173,11 +173,6 @@ jobs:
           check_docs: false
           # cmake_generator: 'MinGW Makefiles'
 
-    env:
-      # CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
-      CMAKE_C_COMPILER: gcc
-      CMAKE_CPP_COMPILER: gcc
-
     steps:
     - uses: actions/checkout@v4
       with:

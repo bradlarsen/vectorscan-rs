@@ -126,7 +126,9 @@ fn main() {
             .define("BUILD_BENCHMARKS", "OFF")
             .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF")
-            .define("BOOST_ROOT", &manifest_dir.parent().unwrap().join("boost_1_88_0"));
+            .define("BOOST_ROOT", &manifest_dir.parent().unwrap().join("boost_1_88_0"))
+            .define("CMAKE_C_COMPILER", "gcc")
+            .define("CMAKE_CPP_COMPILER", "gcc");
 
         cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
         cfg_define_feature!("USE_CPU_NAIVE", "cpu_native");
