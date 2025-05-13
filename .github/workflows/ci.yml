@@ -189,6 +189,7 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
+        targets: x86_64-pc-windows-gnu
 
     # N.B. cache disabled since certain build configurations end up producing
     # microarchitecture-specific code that is not portable across CPUs
@@ -201,16 +202,16 @@ jobs:
     #     key: ${{ matrix.name }}
 
     - name: Build tests
-      run: cargo test --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+      run: cargo test --target x86_64-pc-windows-gnu --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Run tests
-      run: cargo test -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
+      run: cargo test --target x86_64-pc-windows-gnu -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
 
     - name: Check documentation
       if: ${{ matrix.check_docs }}
       env:
         RUSTDOCFLAGS: -D warnings
-      run: cargo doc --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings --no-deps --document-private-items
+      run: cargo doc --target x86_64-pc-windows-gnu --verbose --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings --no-deps --document-private-items
 
     # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
     - name: Upload build timings
