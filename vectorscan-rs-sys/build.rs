@@ -126,7 +126,7 @@ fn main() {
             .define("BUILD_BENCHMARKS", "OFF")
             .define("BUILD_DOC", "OFF")
             .define("BUILD_TOOLS", "OFF")
-            .define("BOOST_ROOT", &manifest_dir.parent().unwrap().join("boost_1_88_0").join("boost"));
+            .define("BOOST_ROOT", &manifest_dir.parent().unwrap().join("boost_1_88_0"));
 
         cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
         cfg_define_feature!("USE_CPU_NAIVE", "cpu_native");
