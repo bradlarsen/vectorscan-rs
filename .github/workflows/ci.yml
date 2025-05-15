@@ -183,10 +183,10 @@ jobs:
         persist-credentials: false
 
     - uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: mingw-w64-pkg-config mingw-w64-boost
+      with:
+        msystem: UCRT64
+        update: true
+        install: mingw-w64-pkg-config mingw-w64-boost
 
     - name: Install dependencies
       run: ${{ matrix.install_dependencies }}
