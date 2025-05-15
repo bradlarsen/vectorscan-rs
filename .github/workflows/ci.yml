@@ -186,7 +186,7 @@ jobs:
       with:
         msystem: UCRT64
         update: true
-        install: mingw-w64-pkg-config mingw-w64-boost
+        install: mingw-w64-ucrt-x86_64-boost mingw-ucrt-w64-x86_64-pkg-config
 
     - name: Install dependencies
       run: ${{ matrix.install_dependencies }}
