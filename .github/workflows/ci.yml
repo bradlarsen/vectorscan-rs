@@ -187,6 +187,7 @@ jobs:
         msystem: UCRT64
         update: true
         install: mingw-w64-ucrt-x86_64-boost mingw-w64-ucrt-x86_64-pkg-config
+        path-type: inherit
 
     - name: Install dependencies
       run: ${{ matrix.install_dependencies }}
