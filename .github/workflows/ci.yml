@@ -45,68 +45,72 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     strategy:
       matrix:
         include:
-        - name: ubuntu-22.04.x86_64.release
-          os: ubuntu-22.04
-          rust: stable
-          profile: release
-          features: unit_hyperscan
-          install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
-          check_docs: false
-          use_ninja: false
+        # - name: ubuntu-22.04.x86_64.release
+        #   os: ubuntu-22.04
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     sudo apt-get install zsh libboost-all-dev
+        #   check_docs: false
+        #   cmake_generator: 'Unix Makefiles'
 
-        - name: ubuntu-22.04.x86_64.test
-          os: ubuntu-22.04
-          rust: stable
-          profile: test
-          features: unit_hyperscan
-          install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
-          check_docs: true
-          use_ninja: false
+        # - name: ubuntu-22.04.x86_64.test
+        #   os: ubuntu-22.04
+        #   rust: stable
+        #   profile: test
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     sudo apt-get install zsh libboost-all-dev
+        #   check_docs: true
+        #   cmake_generator: 'Unix Makefiles'
 
-        - name: ubuntu-22.04.x86_64.release.cpu_native
-          os: ubuntu-22.04
-          rust: stable
-          profile: release
-          features: unit_hyperscan,cpu_native
-          install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
-          check_docs: false
-          use_ninja: false
+        # - name: ubuntu-22.04.x86_64.release.cpu_native
+        #   os: ubuntu-22.04
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     sudo apt-get install zsh libboost-all-dev
+        #   check_docs: false
+        #   cmake_generator: 'Unix Makefiles'
 
-        - name: ubuntu-24.04.x86_64.test
-          os: ubuntu-24.04
-          rust: stable
-          profile: test
-          features: unit_hyperscan
-          install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
-          check_docs: true
-          use_ninja: false
+        # - name: ubuntu-24.04.x86_64.test
+        #   os: ubuntu-24.04
+        #   rust: stable
+        #   profile: test
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     sudo apt-get install zsh libboost-all-dev
+        #   check_docs: true
+        #   cmake_generator: 'Unix Makefiles'
 
-        - name: macos-13.x86_64.test
-          os: macos-13
-          rust: stable
-          profile: test
-          features: unit_hyperscan
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: true
+        # - name: macos-13.x86_64.test
+        #   os: macos-13
+        #   rust: stable
+        #   profile: test
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+        #   cmake_generator: 'Ninja'
 
-        - name: macos-13.x86_64.release
-          os: macos-13
-          rust: stable
-          profile: release
-          features: unit_hyperscan
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: false
+        # - name: macos-13.x86_64.release
+        #   os: macos-13
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+        #   cmake_generator: 'Unix Makefiles'
 
         # Fails with `unknown target CPU 'x86_64_v2'`:
         #
@@ -118,67 +122,74 @@ jobs:
         #   install_dependencies: |
         #     brew install coreutils boost ninja
         #   check_docs: false
-        #   use_ninja: true
+        #   cmake_generator: 'Ninja'
 
-        - name: macos-14.arm64.test
-          os: macos-14  # m1-based macos
-          rust: stable
-          profile: test
-          features: unit_hyperscan
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: true
-
-        - name: macos-14.arm64.release
-          os: macos-14  # m1-based macos
-          rust: stable
-          profile: release
-          features: unit_hyperscan
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: true
-
-        # A build that runs with `bindgen` enabled
-        - name: macos-14.arm64.gen.release
-          os: macos-14  # m1-based macos
-          rust: stable
-          profile: release
-          features: unit_hyperscan,gen
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: true
-
-        - name: macos-14.arm64.release.cpu_native
-          os: macos-14  # m1-based macos
-          rust: stable
-          profile: release
-          features: unit_hyperscan,cpu_native
-          install_dependencies: |
-            brew install coreutils boost
-          check_docs: false
-          use_ninja: true
-
-        # Fails:
-        #
-        # - name: windows-2022.x86_64.test
-        #   os: windows-2022
+        # - name: macos-14.arm64.test
+        #   os: macos-14  # m1-based macos
         #   rust: stable
         #   profile: test
         #   features: unit_hyperscan
         #   install_dependencies: |
+        #     brew install coreutils boost
         #   check_docs: false
-        #   use_ninja: false
+        #   cmake_generator: 'Ninja'
+
+        # - name: macos-14.arm64.release
+        #   os: macos-14  # m1-based macos
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+        #   cmake_generator: 'Ninja'
+
+        # # A build that runs with `bindgen` enabled
+        # - name: macos-14.arm64.gen.release
+        #   os: macos-14  # m1-based macos
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,gen
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+        #   cmake_generator: 'Ninja'
+
+        # - name: macos-14.arm64.release.cpu_native
+        #   os: macos-14  # m1-based macos
+        #   rust: stable
+        #   profile: release
+        #   features: unit_hyperscan,cpu_native
+        #   install_dependencies: |
+        #     brew install coreutils boost
+        #   check_docs: false
+        #   cmake_generator: 'Ninja'
+
+        - name: windows-2025.x86_64.test
+          os: windows-2025
+          rust: stable
+          profile: test
+          features: unit_hyperscan
+          install_dependencies:
+          check_docs: false
+          cmake_generator: 'Ninja'
+          toolchain: x86_64-pc-windows-gnu
 
     env:
-      CMAKE_GENERATOR: ${{ (matrix.use_ninja && 'Ninja') || 'Unix Makefiles' }}
+      CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
 
     steps:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
+
+    - if: ${{ startsWith(matrix.os, 'windows-') }}
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: mingw-w64-ucrt-x86_64-boost mingw-w64-ucrt-x86_64-pkg-config
+        path-type: inherit
 
     - name: Install dependencies
       run: ${{ matrix.install_dependencies }}
@@ -188,16 +199,14 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
+        targets: x86_64-pc-windows-gnu
 
-    # N.B. cache disabled since certain build configurations end up producing
-    # microarchitecture-specific code that is not portable across CPUs
-    # generally
+    - name: Configure Rust toolchain
+      if: ${{ startsWith(matrix.os, 'windows-') }}
+      run: rustup default ${{ matrix.rust }}-${{ matrix.toolchain }}
 
-    # - name: Cache
-    #   uses: Swatinem/rust-cache@v2
-    #   with:
-    #     prefix-key: 'ci-tests'
-    #     key: ${{ matrix.name }}
+    # N.B. we don't use caching here since certain build configurations end up
+    # producing microarchitecture-specific code that is not portable across CPUs
 
     - name: Build tests
       run: cargo test --no-run -vv --profile=${{ matrix.profile }} --features=${{ matrix.features }} --timings
