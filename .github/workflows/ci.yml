@@ -182,7 +182,7 @@ jobs:
       with:
         persist-credentials: false
 
-    - if: ${{ matrix.os == windows-2025 }}
+    - if: ${{ startsWith(matrix.os, 'windows-' }}
       uses: msys2/setup-msys2@v2
       with:
         msystem: UCRT64
