@@ -173,6 +173,7 @@ jobs:
           install_dependencies:
           check_docs: false
           cmake_generator: 'Ninja'
+          toolchain: x86_64-pc-windows-gnu
 
     env:
       CMAKE_GENERATOR: ${{ matrix.cmake_generator }}
@@ -202,7 +203,7 @@ jobs:
 
     - name: Configure Rust toolchain
       if: ${{ startsWith(matrix.os, 'windows-') }}
-      run: rustup default x86_64-pc-windows-gnu
+      run: rustup default ${{ matrix.rust }}-${{ matrix.toolchain }}
 
     # N.B. we don't use caching here since certain build configurations end up
     # producing microarchitecture-specific code that is not portable across CPUs
