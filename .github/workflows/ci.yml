@@ -200,6 +200,10 @@ jobs:
         toolchain: ${{ matrix.rust }}
         targets: x86_64-pc-windows-gnu
 
+    - name: Configure Rust toolchain
+      if: ${{ startsWith(matrix.os, 'windows-') }}
+      run: rustup default x86_64-pc-windows-gnu
+
     # N.B. we don't use caching here since certain build configurations end up
     # producing microarchitecture-specific code that is not portable across CPUs
 
