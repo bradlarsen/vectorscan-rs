@@ -10,7 +10,7 @@ pub enum Error {
     #[error("Error originating from Hyperscan API")]
     Hyperscan(HyperscanErrorCode, i32),
 
-    #[error("Pattern comilation failed, {0} at {1}")]
+    #[error("Pattern compilation failed, {0} at {1}")]
     HyperscanCompile(String, i32),
 }
 
