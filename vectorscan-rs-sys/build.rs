@@ -42,7 +42,7 @@ fn main() {
         }
     }
 
-    const VERSION: &str = "5.4.11";
+    const VERSION: &str = "5.4.12";
 
     let tarball_path = manifest_dir.join(format!("{VERSION}.tar.gz"));
     let vectorscan_src_dir = out_dir.join(format!("vectorscan-vectorscan-{VERSION}"));
