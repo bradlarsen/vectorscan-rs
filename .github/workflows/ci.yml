@@ -8,8 +8,8 @@ on:
     - main
 
   schedule:
-  # Force a run every day at 0007 UTC
-  - cron: '00 07 * * *'
+  # Force a run every tuesday at at 0700 UTC
+  - cron: '* 07 * * 2'
 
 
 env:
