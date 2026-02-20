@@ -54,7 +54,7 @@ jobs:
           profile: release
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
@@ -64,7 +64,7 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: true
           use_ninja: false
 
@@ -74,7 +74,7 @@ jobs:
           profile: release
           features: unit_hyperscan,cpu_native
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
@@ -85,7 +85,7 @@ jobs:
           profile: release
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
@@ -95,7 +95,7 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: true
           use_ninja: false
 
@@ -105,7 +105,7 @@ jobs:
           profile: release
           features: unit_hyperscan,cpu_native
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
@@ -116,7 +116,7 @@ jobs:
           profile: release
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
@@ -126,7 +126,7 @@ jobs:
           profile: test
           features: unit_hyperscan
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: true
           use_ninja: false
 
@@ -136,7 +136,7 @@ jobs:
           profile: release
           features: unit_hyperscan,cpu_native
           install_dependencies: |
-            sudo apt-get install zsh libboost-all-dev
+            sudo apt-get update && sudo apt-get install zsh libboost-all-dev
           check_docs: false
           use_ninja: false
 
