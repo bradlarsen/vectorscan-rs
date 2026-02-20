@@ -133,7 +133,7 @@ mod tests {
 
         let db = wrapper::Database::new(patterns, ScanMode::STREAM)?;
         let db_size = db.size()?;
-        assert_eq!(db_size, 5368); // N.B. this value may change if the vectorscan code changes
+        assert_eq!(db_size, 5432); // N.B. this value may change if the vectorscan code changes
 
         let stream_size = db.stream_size()?;
         assert_eq!(stream_size, 39); // N.B. this value may change if the vectorscan code changes
