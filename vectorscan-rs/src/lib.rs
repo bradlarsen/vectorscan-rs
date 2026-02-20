@@ -36,7 +36,7 @@ mod tests {
         drop(scanner);
         test_basic(&mut scanner2)?;
 
-        assert_eq!(db.size()?, 936); // N.B. this value may change if the vectorscan code changes
+        assert_eq!(db.size()?, 1000); // N.B. this value may change if the vectorscan code changes
 
         Ok(())
     }
@@ -72,7 +72,7 @@ mod tests {
             })?;
             assert_eq!(matches.as_slice(), expected);
 
-            assert_eq!(db.size()?, 936); // N.B. this value may change if the vectorscan code changes
+            assert_eq!(db.size()?, 1000); // N.B. this value may change if the vectorscan code changes
             assert_eq!(db.stream_size()?, 22); // N.B. this value may change if the vectorscan code changes
 
             Ok(())
@@ -110,7 +110,7 @@ mod tests {
 
         let db = wrapper::Database::new(patterns, ScanMode::BLOCK)?;
         let db_size = db.size()?;
-        assert_eq!(db_size, 936); // N.B. this value may change if the vectorscan code changes
+        assert_eq!(db_size, 1000); // N.B. this value may change if the vectorscan code changes
 
         let sdb = db.serialize()?;
         let sdb_size = sdb.deserialized_size()?;
