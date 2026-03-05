@@ -128,7 +128,7 @@ fn main() {
             .define("BUILD_TOOLS", "OFF");
 
         cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
-        cfg_define_feature!("USE_CPU_NAIVE", "cpu_native");
+        cfg_define_feature!("USE_CPU_NATIVE", "cpu_native");
 
         if cfg!(feature = "asan") {
             cfg.define("SANITIZE", "address");
