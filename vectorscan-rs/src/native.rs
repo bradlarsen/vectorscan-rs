@@ -277,14 +277,14 @@ impl<'ss> StreamScanner<'ss> {
 ///
 /// This serves to wrap a Rust closure with a layer of indirection, so it can be referred to
 /// through a `void *` pointer in C.
-struct Context<F>
+pub(crate) struct Context<F>
 where
     F: FnMut(u32, u64, u64, u32) -> Scan,
 {
-    on_match: F,
+    pub(crate) on_match: F,
 }
 
-unsafe extern "C" fn on_match_trampoline<F>(
+pub(crate) unsafe extern "C" fn on_match_trampoline<F>(
     id: c_uint,
     from: c_ulonglong,
     to: c_ulonglong,

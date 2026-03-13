@@ -3,6 +3,8 @@
 
 mod error;
 mod native;
+#[cfg(feature = "shared")]
+pub mod shared;
 mod wrapper;
 
 pub use error::{AsResult, Error, HyperscanErrorCode};
