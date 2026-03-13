@@ -13,8 +13,6 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_FLAGS "${RAGEL_C_FLAGS}")
 
-ragelmaker(ExpressionParser.rl)
-
 set(expressionutil_SRCS
     expressions.cpp
     expressions.h
@@ -22,7 +20,6 @@ set(expressionutil_SRCS
     ExpressionParser.cpp
     )
 add_library(expressionutil STATIC ${expressionutil_SRCS})
-add_dependencies(expressionutil ragel_ExpressionParser)
 
 SET(corpusomatic_SRCS
     ng_corpus_editor.h

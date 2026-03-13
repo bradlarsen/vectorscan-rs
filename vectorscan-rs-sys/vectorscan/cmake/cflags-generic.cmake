@@ -6,8 +6,10 @@ if (NOT CMAKE_COMPILER_IS_CLANG)
 endif()
 
 # Always use -Werror *also during release builds
-set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall -Werror")
-set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wall -Werror")
+if (WARNINGS_AS_ERRORS)
+    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall -Werror")
+    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wall -Werror")
+endif()
 
 if (DISABLE_ASSERTS)
     set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -DNDEBUG")

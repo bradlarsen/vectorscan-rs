@@ -24,15 +24,8 @@ INCLUDE (CheckSymbolExists)
 include (CMakeDependentOption)
 include (GNUInstallDirs)
 include (${CMAKE_MODULE_PATH}/boost.cmake)
-include (${CMAKE_MODULE_PATH}/ragel.cmake)
 
 find_package(PkgConfig QUIET)
-
-find_program(RAGEL ragel)
-
-if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
-    message(FATAL_ERROR "Ragel state machine compiler not found")
-endif()
 
 # Add ccache to speed builds
 find_program(CCACHE_FOUND ccache)
@@ -108,6 +101,7 @@ endif ()
 
 CMAKE_DEPENDENT_OPTION(DUMP_SUPPORT "Dump code support; normally on, except in release builds" ON "NOT RELEASE_BUILD" OFF)
 CMAKE_DEPENDENT_OPTION(DISABLE_ASSERTS "Disable assert(); Asserts are enabled in debug builds, disabled in release builds" OFF "NOT RELEASE_BUILD" ON)
+CMAKE_DEPENDENT_OPTION(WARNINGS_AS_ERRORS "Warnings are errors; enabled in debug builds, disabled in release builds" ON "NOT RELEASE_BUILD" OFF)
 
 option(DEBUG_OUTPUT "Enable debug output (warning: very verbose)" OFF)
 if(DEBUG_OUTPUT)
@@ -159,11 +153,11 @@ include (${CMAKE_MODULE_PATH}/archdetect.cmake)
 include (${CMAKE_MODULE_PATH}/sanitize.cmake)
 
 if (NOT FAT_RUNTIME)
-    if (GNUCC_TUNE)
+    if (USE_CPU_NATIVE AND GNUCC_TUNE)
         message(STATUS "GNUCC_TUNE is set")
         set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
         set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -${TUNE_FLAG}=${GNUCC_TUNE}")
-    else()
+    elseif(USE_CPU_NATIVE)
         message(STATUS "GNUCC_TUNE is not set")
         set(ARCH_C_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_C_FLAGS}")
         set(ARCH_CXX_FLAGS "-${ARCH_FLAG}=${GNUCC_ARCH} -mtune=${TUNE_FLAG} ${ARCH_CXX_FLAGS}")
@@ -221,14 +215,10 @@ set_source_files_properties(
     PROPERTIES
         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
 
-ragelmaker(src/parser/Parser.rl)
-
 set_source_files_properties(
    src/parser/control_verbs.cpp
     PROPERTIES
         COMPILE_FLAGS "${RAGEL_C_FLAGS}")
-
-ragelmaker(src/parser/control_verbs.rl)
 
 # BSD has the _np funcs in a _np header
 CHECK_INCLUDE_FILE_CXX(pthread_np.h HAVE_PTHREAD_NP_H)
@@ -1265,10 +1255,6 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 if (BUILD_STATIC_LIBS)
-    add_dependencies(hs ragel_Parser)
-endif ()
-
-if (BUILD_STATIC_LIBS)
     install(TARGETS hs DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
@@ -1291,7 +1277,6 @@ if (BUILD_SHARED_LIBS)
 
     add_library(hs_shared SHARED ${hs_shared_SRCS} hs.def)
 
-    add_dependencies(hs_shared ragel_Parser)
     set_target_properties(hs_shared PROPERTIES
         OUTPUT_NAME hs
         VERSION ${LIB_VERSION}

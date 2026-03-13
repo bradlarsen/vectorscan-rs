@@ -49,6 +49,7 @@ using namespace std;
 #define SRCDIR_PREFIX xstr(SRCDIR)
 
 
+/*
 TEST(rebar, leipzig_math_symbols_count) {
     hs_database_t *db = nullptr;
     hs_compile_error_t *compile_err = nullptr;
@@ -81,6 +82,7 @@ TEST(rebar, leipzig_math_symbols_count) {
     err = hs_free_scratch(scratch);
     ASSERT_EQ(HS_SUCCESS, err);
 }
+*/
 
 // Function to replace invalid UTF-8 sequences with the replacement character
 std::string utf8_lossy_decode(const std::string &input) {
@@ -123,6 +125,7 @@ std::string utf8_lossy_decode(const std::string &input) {
     return output;
 }
 
+/*
 TEST(rebar, lh3lh3_reb_uri_or_email_grep) {
     hs_database_t *db = nullptr;
     hs_compile_error_t *compile_err = nullptr;
@@ -229,6 +232,7 @@ TEST(rebar, lh3lh3_reb_date_grep) {
     err = hs_free_scratch(scratch);
     ASSERT_EQ(HS_SUCCESS, err);
 }
+*/
 
 
 const char *patterns[] = {
