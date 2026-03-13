@@ -318,7 +318,7 @@ jobs:
 
     # See https://doc.rust-lang.org/nightly/cargo/reference/timings.html for details
     - name: Upload build timings
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: build-timings.${{ matrix.name }}
         path: target/cargo-timings
