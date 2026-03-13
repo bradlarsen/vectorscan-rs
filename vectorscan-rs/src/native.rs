@@ -35,7 +35,7 @@ impl BlockDatabase {
     }
 
     /// Create a new scanner from this database
-    pub fn create_scanner(&self) -> Result<BlockScanner, Error> {
+    pub fn create_scanner(&self) -> Result<BlockScanner<'_>, Error> {
         BlockScanner::new(self)
     }
 
@@ -126,7 +126,7 @@ impl StreamingDatabase {
     }
 
     /// Create a new scanner from this database
-    pub fn create_scanner(&self) -> Result<StreamingScanner, Error> {
+    pub fn create_scanner(&self) -> Result<StreamingScanner<'_>, Error> {
         StreamingScanner::new(self)
     }
 
