@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## Unreleased
 
 ### Additions
-- Added Windows build support for the bundled Vectorscan source when targeting MinGW GNU/LLVM toolchains.
+- Added Windows build support for the bundled Vectorscan source when targeting MinGW GNU/LLVM toolchains on x86_64 and aarch64.
 - Added a `HYPERSCAN_ROOT` override so builds can link against an existing Vectorscan/Hyperscan installation instead of compiling the bundled source.
 
 ### Fixes

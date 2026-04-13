@@ -313,13 +313,14 @@ jobs:
         path: target/cargo-timings
         if-no-files-found: error
 
-  windows-tests:
+  windows-x64-tests:
     name: CI (windows-2025.x86_64.test)
     runs-on: windows-2025
 
     env:
       CMAKE_GENERATOR: Ninja
       CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
+      CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS: -C target-feature=+crt-static -C link-arg=-static
 
     steps:
     - uses: actions/checkout@v6
@@ -351,15 +352,69 @@ jobs:
 
     - name: Build tests
       shell: msys2 {0}
-      run: cargo test --no-run -vv --target x86_64-pc-windows-gnu --features unit_hyperscan --timings
+      run: cargo test --no-run -vv --target x86_64-pc-windows-gnu --timings
 
     - name: Run tests
       shell: msys2 {0}
-      run: cargo test -vv --target x86_64-pc-windows-gnu --features unit_hyperscan --timings
+      run: cargo test -vv --target x86_64-pc-windows-gnu --timings
 
     - name: Upload build timings
       uses: actions/upload-artifact@v7
       with:
         name: build-timings.windows-2025.x86_64.test
+        path: target/cargo-timings
+        if-no-files-found: error
+
+  windows-arm64-tests:
+    name: CI (windows-11.arm64.test)
+    runs-on: windows-11-arm
+
+    env:
+      CC: clang
+      CXX: clang++
+      CMAKE_GENERATOR: Ninja
+      CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: clang
+      CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C target-feature=+crt-static -C link-arg=-static
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: CLANGARM64
+        update: true
+        path-type: inherit
+        install: >-
+          git
+          mingw-w64-clang-aarch64-toolchain
+          mingw-w64-clang-aarch64-cmake
+          mingw-w64-clang-aarch64-ninja
+          mingw-w64-clang-aarch64-boost
+          mingw-w64-clang-aarch64-pkgconf
+          mingw-w64-clang-aarch64-pcre2
+          mingw-w64-clang-aarch64-python
+          mingw-w64-clang-aarch64-zlib
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain-windows-arm64
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        targets: aarch64-pc-windows-gnullvm
+
+    - name: Build tests
+      shell: msys2 {0}
+      run: cargo test --no-run -vv --target aarch64-pc-windows-gnullvm --timings
+
+    - name: Run tests
+      shell: msys2 {0}
+      run: cargo test -vv --target aarch64-pc-windows-gnullvm --timings
+
+    - name: Upload build timings
+      uses: actions/upload-artifact@v7
+      with:
+        name: build-timings.windows-11.arm64.test
         path: target/cargo-timings
         if-no-files-found: error
