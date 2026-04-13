@@ -12,6 +12,15 @@ This crate builds a vendored copy of Vectorscan from source.
 - Optional: [Clang](https://clang.llvm.org), when building with the `bindgen` feature
 
 This has been tested on x86_64 Linux, x86_64 macOS, and aarch64 macOS.
+The CI matrix also exercises x86_64 Windows with MSYS2 MINGW64 and aarch64 Windows with MSYS2 CLANGARM64.
+
+Set `HYPERSCAN_ROOT` to the install prefix of an existing Vectorscan/Hyperscan installation to link against that installation instead of building the bundled source.
+The build script expects headers under `$HYPERSCAN_ROOT/include` and libraries under `$HYPERSCAN_ROOT/lib` or `$HYPERSCAN_ROOT/lib64`.
+When `HYPERSCAN_ROOT` is set, the build script prefers static linkage if `libhs.a` is present, otherwise it uses a dynamic/import library if one is present.
+Set `HYPERSCAN_LINK_KIND=static` or `HYPERSCAN_LINK_KIND=dynamic` to choose explicitly.
+On Windows GNU/LLVM targets, `HYPERSCAN_ROOT` is required.
+Build and install Vectorscan with the matching MSYS2 MinGW toolchain first, then point `HYPERSCAN_ROOT` at that install prefix.
+For example, use the MSYS2 MINGW64 toolchain and `/mingw64` prefix for `x86_64-pc-windows-gnu`, or the MSYS2 CLANGARM64 toolchain and `/clangarm64` prefix for `aarch64-pc-windows-gnullvm`.
 
 
 ## Implementation Notes
