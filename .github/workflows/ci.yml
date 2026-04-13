@@ -266,17 +266,6 @@ jobs:
           check_docs: false
           use_ninja: true
 
-        # Fails:
-        #
-        # - name: windows-2022.x86_64.test
-        #   os: windows-2022
-        #   rust: stable
-        #   profile: test
-        #   features: unit_hyperscan
-        #   install_dependencies: |
-        #   check_docs: false
-        #   use_ninja: false
-
     env:
       CMAKE_GENERATOR: ${{ (matrix.use_ninja && 'Ninja') || 'Unix Makefiles' }}
 
@@ -321,5 +310,56 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: build-timings.${{ matrix.name }}
+        path: target/cargo-timings
+        if-no-files-found: error
+
+  windows-tests:
+    name: CI (windows-2025.x86_64.test)
+    runs-on: windows-2025
+
+    env:
+      CMAKE_GENERATOR: Ninja
+      CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        path-type: inherit
+        install: >-
+          git
+          mingw-w64-ucrt-x86_64-toolchain
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-boost
+          mingw-w64-ucrt-x86_64-pkgconf
+          mingw-w64-ucrt-x86_64-pcre2
+          mingw-w64-ucrt-x86_64-python
+          mingw-w64-ucrt-x86_64-zlib
+
+    - name: Install Rust toolchain
+      id: install-rust-toolchain-windows
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        targets: x86_64-pc-windows-gnu
+
+    - name: Build tests
+      shell: msys2 {0}
+      run: cargo test --no-run -vv --target x86_64-pc-windows-gnu --features unit_hyperscan --timings
+
+    - name: Run tests
+      shell: msys2 {0}
+      run: cargo test -vv --target x86_64-pc-windows-gnu --features unit_hyperscan --timings
+
+    - name: Upload build timings
+      uses: actions/upload-artifact@v7
+      with:
+        name: build-timings.windows-2025.x86_64.test
         path: target/cargo-timings
         if-no-files-found: error

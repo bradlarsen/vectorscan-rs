@@ -11,7 +11,13 @@ This crate builds a vendored copy of Vectorscan from source.
 - [CMake](https://cmake.org)
 - Optional: [Clang](https://clang.llvm.org), when building with the `bindgen` feature
 
-This has been tested on x86_64 Linux, x86_64 macOS, and aarch64 macOS.
+This has been tested on x86_64 Linux, x86_64 macOS, aarch64 macOS, and x86_64 Windows with MSYS2 UCRT64.
+
+On Windows GNU targets, install the matching MSYS2 MinGW toolchain, CMake, Boost, Ninja, pkgconf, PCRE2, zlib, and Python packages before building.
+For example, the `x86_64-pc-windows-gnu` target can be built from an MSYS2 UCRT64 shell with the `mingw-w64-ucrt-x86_64-*` packages for those dependencies.
+
+Set `HYPERSCAN_ROOT` to the install prefix of an existing Vectorscan/Hyperscan installation to link against that installation instead of building the bundled source.
+The build script expects headers under `$HYPERSCAN_ROOT/include` and libraries under `$HYPERSCAN_ROOT/lib` or `$HYPERSCAN_ROOT/lib64`.
 
 
 ## Implementation Notes

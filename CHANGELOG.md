@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+
+### Additions
+- Added Windows build support for the bundled Vectorscan source when targeting MinGW GNU/LLVM toolchains.
+- Added a `HYPERSCAN_ROOT` override so builds can link against an existing Vectorscan/Hyperscan installation instead of compiling the bundled source.
+
+### Fixes
+- Fixed musl cross-compilation by supplying Vectorscan's `unistd.h` and `posix_memalign` configure results for musl targets.
+
+
 ## [v0.0.6](https://github.com/bradlarsen/vectorscan-rs/releases/v0.0.6) (2026-03-12)
 
 ### Changes
