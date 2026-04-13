@@ -377,6 +377,7 @@ jobs:
         libgcc_dir="$(dirname "$libgcc_a_path")"
         {
           echo "HYPERSCAN_ROOT=$(cygpath -m /mingw64)"
+          echo "HYPERSCAN_LINK_KIND=static"
           echo "LIBHS_NO_PKG_CONFIG=1"
           echo "LIBRARY_PATH=/mingw64/lib:${LIBRARY_PATH:-}"
           echo "CPATH=/mingw64/include:${CPATH:-}"
@@ -467,6 +468,7 @@ jobs:
 
         {
           echo "HYPERSCAN_ROOT=$(cygpath -m /clangarm64)"
+          echo "HYPERSCAN_LINK_KIND=static"
           echo "LIBHS_NO_PKG_CONFIG=1"
           echo "LIBRARY_PATH=/clangarm64/lib:${LIBRARY_PATH:-}"
           echo "CPATH=/clangarm64/include:${CPATH:-}"

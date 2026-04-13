@@ -43,6 +43,7 @@ fn main() {
     // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-env-changed=HYPERSCAN_ROOT");
+    println!("cargo:rerun-if-env-changed=HYPERSCAN_LINK_KIND");
     println!("cargo:rerun-if-env-changed=MINGW_PREFIX");
     println!("cargo:rerun-if-env-changed=MSYSTEM_PREFIX");
     println!("cargo:rerun-if-env-changed=PATH");
@@ -52,11 +53,7 @@ fn main() {
     let target = Target::from_env();
 
     let build = match std::env::var_os("HYPERSCAN_ROOT") {
-        Some(hs_root) => BuildOutput {
-            include_dir: PathBuf::from(&hs_root).join("include"),
-            lib_dirs: lib_dirs_for_root(Path::new(&hs_root)),
-            source_built: false,
-        },
+        Some(hs_root) => build_existing_hyperscan(Path::new(&hs_root)),
         None if target.is_windows() => {
             panic!(
                 "HYPERSCAN_ROOT must point to an installed Vectorscan/Hyperscan prefix on Windows"
@@ -66,7 +63,7 @@ fn main() {
     };
 
     link_library_dirs(&build.lib_dirs);
-    println!("cargo:rustc-link-lib=static=hs");
+    link_hyperscan(build.link_kind);
     link_cpp_runtime(&target);
 
     run_hyperscan_unit_tests(&out_dir, &target, build.source_built);
@@ -77,6 +74,25 @@ struct BuildOutput {
     include_dir: PathBuf,
     lib_dirs: Vec<PathBuf>,
     source_built: bool,
+    link_kind: LinkKind,
+}
+
+#[derive(Clone, Copy)]
+enum LinkKind {
+    Static,
+    Dynamic,
+}
+
+impl LinkKind {
+    fn from_env() -> Option<Self> {
+        match std::env::var("HYPERSCAN_LINK_KIND").ok()?.as_str() {
+            "static" => Some(Self::Static),
+            "dynamic" | "dylib" => Some(Self::Dynamic),
+            other => panic!(
+                "Unsupported HYPERSCAN_LINK_KIND={other}; expected `static`, `dynamic`, or `dylib`"
+            ),
+        }
+    }
 }
 
 fn build_vendored_vectorscan(manifest_dir: &Path, out_dir: &Path, target: &Target) -> BuildOutput {
@@ -200,6 +216,17 @@ fn build_vendored_vectorscan(manifest_dir: &Path, out_dir: &Path, target: &Targe
         include_dir,
         lib_dirs: vec![dst.join("lib"), dst.join("lib64")],
         source_built: true,
+        link_kind: LinkKind::Static,
+    }
+}
+
+fn build_existing_hyperscan(root: &Path) -> BuildOutput {
+    let lib_dirs = lib_dirs_for_root(root);
+    BuildOutput {
+        include_dir: root.join("include"),
+        link_kind: LinkKind::from_env().unwrap_or_else(|| detect_hyperscan_link_kind(&lib_dirs)),
+        lib_dirs,
+        source_built: false,
     }
 }
 
@@ -211,6 +238,40 @@ fn link_library_dirs(lib_dirs: &[PathBuf]) {
     for lib_dir in lib_dirs {
         println!("cargo:rustc-link-search=native={}", lib_dir.display());
     }
+}
+
+fn link_hyperscan(link_kind: LinkKind) {
+    match link_kind {
+        LinkKind::Static => println!("cargo:rustc-link-lib=static=hs"),
+        LinkKind::Dynamic => println!("cargo:rustc-link-lib=dylib=hs"),
+    }
+}
+
+fn detect_hyperscan_link_kind(lib_dirs: &[PathBuf]) -> LinkKind {
+    if lib_dirs
+        .iter()
+        .any(|lib_dir| lib_dir.join("libhs.a").is_file())
+    {
+        return LinkKind::Static;
+    }
+
+    if lib_dirs.iter().any(|lib_dir| {
+        [
+            "libhs.so",
+            "libhs.dylib",
+            "libhs.dll.a",
+            "hs.dll.lib",
+            "hs.lib",
+        ]
+        .iter()
+        .any(|lib_name| lib_dir.join(lib_name).is_file())
+    }) {
+        return LinkKind::Dynamic;
+    }
+
+    panic!(
+        "Could not find Vectorscan/Hyperscan library under HYPERSCAN_ROOT; expected libhs.a, libhs.so, libhs.dylib, libhs.dll.a, hs.dll.lib, or hs.lib"
+    );
 }
 
 fn link_cpp_runtime(target: &Target) {
