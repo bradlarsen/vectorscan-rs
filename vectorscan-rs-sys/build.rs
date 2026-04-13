@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -42,6 +43,9 @@ fn main() {
     // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-env-changed=HYPERSCAN_ROOT");
+    println!("cargo:rerun-if-env-changed=MINGW_PREFIX");
+    println!("cargo:rerun-if-env-changed=MSYSTEM_PREFIX");
+    println!("cargo:rerun-if-env-changed=PATH");
 
     let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
@@ -211,12 +215,22 @@ fn link_cpp_runtime(target: &Target) {
         } else if target.is_windows_gnullvm() {
             // On clang/LLVM MinGW targets, prefer static LLVM runtime linkage to avoid runtime
             // DLL dependencies.
+            add_windows_runtime_search_dirs(
+                target,
+                &["libc++.a", "libc++abi.a", "libunwind.a"],
+                &windows_clang_tools(target),
+            );
             println!("cargo:rustc-link-lib=static=c++");
             println!("cargo:rustc-link-lib=static=c++abi");
             println!("cargo:rustc-link-lib=static=unwind");
         } else if target.env == "gnu" {
             // On MinGW GNU targets, prefer static GNU C++ runtime linkage to avoid runtime DLL
             // dependencies.
+            add_windows_runtime_search_dirs(
+                target,
+                &["libstdc++.a", "libgcc.a", "libwinpthread.a"],
+                &windows_gnu_tools(target),
+            );
             println!("cargo:rustc-link-lib=static=stdc++");
             println!("cargo:rustc-link-lib=static=gcc");
             println!("cargo:rustc-link-lib=static=winpthread");
@@ -247,6 +261,125 @@ fn link_cpp_runtime(target: &Target) {
     } else {
         panic!("No compatible compiler found: either clang or gcc is needed");
     }
+}
+
+fn windows_gnu_tools(target: &Target) -> Vec<&'static str> {
+    match target.arch.as_str() {
+        "x86_64" => vec![
+            "x86_64-w64-mingw32-g++",
+            "x86_64-w64-mingw32-gcc",
+            "g++",
+            "gcc",
+            "c++",
+        ],
+        "aarch64" => vec![
+            "aarch64-w64-mingw32-g++",
+            "aarch64-w64-mingw32-gcc",
+            "g++",
+            "gcc",
+            "c++",
+        ],
+        _ => vec!["g++", "gcc", "c++"],
+    }
+}
+
+fn windows_clang_tools(target: &Target) -> Vec<&'static str> {
+    match target.arch.as_str() {
+        "x86_64" => vec![
+            "x86_64-w64-mingw32-clang++",
+            "x86_64-w64-mingw32-clang",
+            "clang++",
+            "clang",
+        ],
+        "aarch64" => vec![
+            "aarch64-w64-mingw32-clang++",
+            "aarch64-w64-mingw32-clang",
+            "clang++",
+            "clang",
+        ],
+        _ => vec!["clang++", "clang"],
+    }
+}
+
+fn add_windows_runtime_search_dirs(target: &Target, lib_names: &[&str], tools: &[&str]) {
+    if !target.is_windows() {
+        return;
+    }
+
+    let mut dirs = BTreeSet::new();
+
+    for tool in tools {
+        for lib_name in lib_names {
+            if let Some(dir) = runtime_lib_dir_from_tool(tool, lib_name) {
+                dirs.insert(dir);
+            }
+        }
+    }
+
+    for prefix_var in ["MINGW_PREFIX", "MSYSTEM_PREFIX"] {
+        if let Some(prefix) = std::env::var_os(prefix_var) {
+            let lib_dir = PathBuf::from(prefix).join("lib");
+            if lib_names.iter().any(|lib_name| {
+                resolve_existing_path(lib_dir.join(lib_name))
+                    .map(|lib_path| lib_path.is_file())
+                    .unwrap_or(false)
+            }) {
+                if let Some(dir) = resolve_existing_path(lib_dir) {
+                    dirs.insert(dir);
+                }
+            }
+        }
+    }
+
+    for dir in dirs {
+        println!("cargo:rustc-link-search=native={}", dir.display());
+    }
+}
+
+fn runtime_lib_dir_from_tool(tool: &str, lib_name: &str) -> Option<PathBuf> {
+    let output = Command::new(tool)
+        .arg(format!("-print-file-name={lib_name}"))
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let stdout = String::from_utf8(output.stdout).ok()?;
+    let lib_path = PathBuf::from(stdout.trim());
+    if lib_path.as_os_str().is_empty() || lib_path == PathBuf::from(lib_name) {
+        return None;
+    }
+
+    let lib_path = resolve_existing_path(lib_path)?;
+    if !lib_path.is_file() {
+        return None;
+    }
+
+    lib_path.parent().map(Path::to_path_buf)
+}
+
+fn resolve_existing_path(path: PathBuf) -> Option<PathBuf> {
+    if path.exists() {
+        return Some(path);
+    }
+
+    let path_str = path.to_string_lossy();
+    if !path_str.starts_with('/') {
+        return None;
+    }
+
+    let output = Command::new("cygpath")
+        .args(["-m", path_str.as_ref()])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let stdout = String::from_utf8(output.stdout).ok()?;
+    let converted = PathBuf::from(stdout.trim());
+    converted.exists().then_some(converted)
 }
 
 fn write_bindings(manifest_dir: &Path, out_dir: &Path, include_dir: &Path) {
