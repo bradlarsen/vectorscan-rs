@@ -12,14 +12,13 @@ This crate builds a vendored copy of Vectorscan from source.
 - Optional: [Clang](https://clang.llvm.org), when building with the `bindgen` feature
 
 This has been tested on x86_64 Linux, x86_64 macOS, and aarch64 macOS.
-The CI matrix also exercises x86_64 Windows with MSYS2 UCRT64 and aarch64 Windows with MSYS2 CLANGARM64.
-
-On Windows GNU/LLVM targets, install the matching MSYS2 MinGW toolchain, CMake, Boost, Ninja, pkgconf, PCRE2, zlib, and Python packages before building.
-For example, the `x86_64-pc-windows-gnu` target can be built from an MSYS2 UCRT64 shell with the `mingw-w64-ucrt-x86_64-*` packages for those dependencies.
-The `aarch64-pc-windows-gnullvm` target can be built from an MSYS2 CLANGARM64 shell with the `mingw-w64-clang-aarch64-*` packages.
+The CI matrix also exercises x86_64 Windows with MSYS2 MINGW64 and aarch64 Windows with MSYS2 CLANGARM64.
 
 Set `HYPERSCAN_ROOT` to the install prefix of an existing Vectorscan/Hyperscan installation to link against that installation instead of building the bundled source.
 The build script expects headers under `$HYPERSCAN_ROOT/include` and libraries under `$HYPERSCAN_ROOT/lib` or `$HYPERSCAN_ROOT/lib64`.
+On Windows GNU/LLVM targets, `HYPERSCAN_ROOT` is required.
+Build and install Vectorscan with the matching MSYS2 MinGW toolchain first, then point `HYPERSCAN_ROOT` at that install prefix.
+For example, use the MSYS2 MINGW64 toolchain and `/mingw64` prefix for `x86_64-pc-windows-gnu`, or the MSYS2 CLANGARM64 toolchain and `/clangarm64` prefix for `aarch64-pc-windows-gnullvm`.
 
 
 ## Implementation Notes

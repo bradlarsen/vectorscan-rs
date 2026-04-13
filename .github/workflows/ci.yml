@@ -9,7 +9,7 @@ on:
 
   schedule:
   # Force a run every tuesday at at 0700 UTC
-  - cron: '* 07 * * 2'
+  - cron: '0 07 * * 2'
 
 
 env:
@@ -318,9 +318,7 @@ jobs:
     runs-on: windows-2025
 
     env:
-      CMAKE_GENERATOR: Ninja
       CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
-      CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS: -C target-feature=+crt-static -C link-arg=-static
 
     steps:
     - uses: actions/checkout@v6
@@ -329,19 +327,20 @@ jobs:
 
     - uses: msys2/setup-msys2@v2
       with:
-        msystem: UCRT64
+        msystem: MINGW64
         update: true
         path-type: inherit
         install: >-
           git
-          mingw-w64-ucrt-x86_64-toolchain
-          mingw-w64-ucrt-x86_64-cmake
-          mingw-w64-ucrt-x86_64-ninja
-          mingw-w64-ucrt-x86_64-boost
-          mingw-w64-ucrt-x86_64-pkgconf
-          mingw-w64-ucrt-x86_64-pcre2
-          mingw-w64-ucrt-x86_64-python
-          mingw-w64-ucrt-x86_64-zlib
+          make
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-boost
+          mingw-w64-x86_64-pkgconf
+          mingw-w64-x86_64-ragel
+          mingw-w64-x86_64-pcre2
+          mingw-w64-x86_64-python
+          mingw-w64-x86_64-zlib
 
     - name: Install Rust toolchain
       id: install-rust-toolchain-windows
@@ -349,6 +348,43 @@ jobs:
       with:
         toolchain: stable
         targets: x86_64-pc-windows-gnu
+
+    - name: Build Vectorscan
+      shell: msys2 {0}
+      run: |
+        set -euxo pipefail
+        repo_root="$(pwd)"
+        vectorscan_src="$repo_root/vectorscan-rs-sys/vectorscan"
+        build_dir=/tmp/vectorscan-build
+        rm -rf "$build_dir"
+        mkdir -p "$build_dir"
+        cd "$build_dir"
+        cmake "$vectorscan_src" \
+          -G "MinGW Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_STATIC_LIBS=ON \
+          -DBUILD_UNIT=OFF \
+          -DBUILD_TOOLS=OFF \
+          -DFAT_RUNTIME=OFF \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_INSTALL_PREFIX=/mingw64
+        mingw32-make -j"$(nproc)"
+        mingw32-make install
+
+        libgcc_a_path="$(x86_64-w64-mingw32-gcc -print-libgcc-file-name)"
+        libgcc_dir="$(dirname "$libgcc_a_path")"
+        {
+          echo "HYPERSCAN_ROOT=$(cygpath -m /mingw64)"
+          echo "LIBHS_NO_PKG_CONFIG=1"
+          echo "LIBRARY_PATH=/mingw64/lib:${LIBRARY_PATH:-}"
+          echo "CPATH=/mingw64/include:${CPATH:-}"
+          echo "PKG_CONFIG_ALLOW_CROSS=1"
+          echo "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"
+          echo "PKG_CONFIG_LIBDIR=/mingw64/lib/pkgconfig"
+          echo "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS=-L native=/mingw64/lib -L native=$libgcc_dir -C target-feature=+crt-static -C link-arg=-static"
+        } >> "$GITHUB_ENV"
 
     - name: Build tests
       shell: msys2 {0}
@@ -372,9 +408,7 @@ jobs:
     env:
       CC: clang
       CXX: clang++
-      CMAKE_GENERATOR: Ninja
       CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: clang
-      CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C target-feature=+crt-static -C link-arg=-static
 
     steps:
     - uses: actions/checkout@v6
@@ -388,11 +422,12 @@ jobs:
         path-type: inherit
         install: >-
           git
+          make
           mingw-w64-clang-aarch64-toolchain
           mingw-w64-clang-aarch64-cmake
-          mingw-w64-clang-aarch64-ninja
           mingw-w64-clang-aarch64-boost
           mingw-w64-clang-aarch64-pkgconf
+          mingw-w64-clang-aarch64-ragel
           mingw-w64-clang-aarch64-pcre2
           mingw-w64-clang-aarch64-python
           mingw-w64-clang-aarch64-zlib
@@ -403,6 +438,43 @@ jobs:
       with:
         toolchain: stable
         targets: aarch64-pc-windows-gnullvm
+
+    - name: Build Vectorscan
+      shell: msys2 {0}
+      run: |
+        set -euxo pipefail
+        repo_root="$(pwd)"
+        vectorscan_src="$repo_root/vectorscan-rs-sys/vectorscan"
+        build_dir=/tmp/vectorscan-arm64-build
+        rm -rf "$build_dir"
+        mkdir -p "$build_dir"
+        cd "$build_dir"
+        cmake "$vectorscan_src" \
+          -G "MinGW Makefiles" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_STATIC_LIBS=ON \
+          -DBUILD_UNIT=OFF \
+          -DBUILD_TOOLS=OFF \
+          -DFAT_RUNTIME=OFF \
+          -DCMAKE_SYSTEM_NAME=Windows \
+          -DCMAKE_SYSTEM_PROCESSOR=ARM64 \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_INSTALL_PREFIX=/clangarm64
+        mingw32-make -j"$(nproc)"
+        mingw32-make install
+
+        {
+          echo "HYPERSCAN_ROOT=$(cygpath -m /clangarm64)"
+          echo "LIBHS_NO_PKG_CONFIG=1"
+          echo "LIBRARY_PATH=/clangarm64/lib:${LIBRARY_PATH:-}"
+          echo "CPATH=/clangarm64/include:${CPATH:-}"
+          echo "PKG_CONFIG_ALLOW_CROSS=1"
+          echo "PKG_CONFIG_PATH=/clangarm64/lib/pkgconfig"
+          echo "PKG_CONFIG_LIBDIR=/clangarm64/lib/pkgconfig"
+          echo "CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS=-L native=/clangarm64/lib -C target-feature=+crt-static -C link-arg=-static"
+        } >> "$GITHUB_ENV"
 
     - name: Build tests
       shell: msys2 {0}

@@ -57,6 +57,11 @@ fn main() {
             lib_dirs: lib_dirs_for_root(Path::new(&hs_root)),
             source_built: false,
         },
+        None if target.is_windows() => {
+            panic!(
+                "HYPERSCAN_ROOT must point to an installed Vectorscan/Hyperscan prefix on Windows"
+            )
+        }
         None => build_vendored_vectorscan(&manifest_dir, &out_dir, &target),
     };
 
