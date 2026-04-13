@@ -314,8 +314,24 @@ jobs:
         if-no-files-found: error
 
   windows-x64-tests:
-    name: CI (windows-2025.x86_64.test)
+    name: CI (${{ matrix.name }})
     runs-on: windows-2025
+
+    strategy:
+      matrix:
+        include:
+        - name: windows-2025.x86_64.release
+          profile: release
+          features: ''
+          use_cpu_native: OFF
+        - name: windows-2025.x86_64.test
+          profile: test
+          features: ''
+          use_cpu_native: OFF
+        - name: windows-2025.x86_64.release.cpu_native
+          profile: release
+          features: cpu_native
+          use_cpu_native: ON
 
     env:
       CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
@@ -367,6 +383,7 @@ jobs:
           -DBUILD_UNIT=OFF \
           -DBUILD_TOOLS=OFF \
           -DFAT_RUNTIME=OFF \
+          -DUSE_CPU_NATIVE=${{ matrix.use_cpu_native }} \
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_CXX_COMPILER=g++ \
           -DCMAKE_INSTALL_PREFIX=/mingw64
@@ -389,22 +406,54 @@ jobs:
 
     - name: Build tests
       shell: msys2 {0}
-      run: cargo test --no-run -vv --target x86_64-pc-windows-gnu --timings
+      env:
+        FEATURES: ${{ matrix.features }}
+        PROFILE: ${{ matrix.profile }}
+      run: |
+        features_arg=()
+        if [ -n "$FEATURES" ]; then
+          features_arg=(--features="$FEATURES")
+        fi
+        cargo test --no-run -vv --profile="$PROFILE" --target x86_64-pc-windows-gnu "${features_arg[@]}" --timings
 
     - name: Run tests
       shell: msys2 {0}
-      run: cargo test -vv --target x86_64-pc-windows-gnu --timings
+      env:
+        FEATURES: ${{ matrix.features }}
+        PROFILE: ${{ matrix.profile }}
+      run: |
+        features_arg=()
+        if [ -n "$FEATURES" ]; then
+          features_arg=(--features="$FEATURES")
+        fi
+        cargo test -vv --profile="$PROFILE" --target x86_64-pc-windows-gnu "${features_arg[@]}" --timings
 
     - name: Upload build timings
       uses: actions/upload-artifact@v7
       with:
-        name: build-timings.windows-2025.x86_64.test
+        name: build-timings.${{ matrix.name }}
         path: target/cargo-timings
         if-no-files-found: error
 
   windows-arm64-tests:
-    name: CI (windows-11.arm64.test)
+    name: CI (${{ matrix.name }})
     runs-on: windows-11-arm
+
+    strategy:
+      matrix:
+        include:
+        - name: windows-11.arm64.release
+          profile: release
+          features: ''
+          use_cpu_native: OFF
+        - name: windows-11.arm64.test
+          profile: test
+          features: ''
+          use_cpu_native: OFF
+        - name: windows-11.arm64.release.cpu_native
+          profile: release
+          features: cpu_native
+          use_cpu_native: ON
 
     env:
       CC: clang
@@ -458,6 +507,7 @@ jobs:
           -DBUILD_UNIT=OFF \
           -DBUILD_TOOLS=OFF \
           -DFAT_RUNTIME=OFF \
+          -DUSE_CPU_NATIVE=${{ matrix.use_cpu_native }} \
           -DCMAKE_SYSTEM_NAME=Windows \
           -DCMAKE_SYSTEM_PROCESSOR=ARM64 \
           -DCMAKE_C_COMPILER=clang \
@@ -480,15 +530,31 @@ jobs:
 
     - name: Build tests
       shell: msys2 {0}
-      run: cargo test --no-run -vv --target aarch64-pc-windows-gnullvm --timings
+      env:
+        FEATURES: ${{ matrix.features }}
+        PROFILE: ${{ matrix.profile }}
+      run: |
+        features_arg=()
+        if [ -n "$FEATURES" ]; then
+          features_arg=(--features="$FEATURES")
+        fi
+        cargo test --no-run -vv --profile="$PROFILE" --target aarch64-pc-windows-gnullvm "${features_arg[@]}" --timings
 
     - name: Run tests
       shell: msys2 {0}
-      run: cargo test -vv --target aarch64-pc-windows-gnullvm --timings
+      env:
+        FEATURES: ${{ matrix.features }}
+        PROFILE: ${{ matrix.profile }}
+      run: |
+        features_arg=()
+        if [ -n "$FEATURES" ]; then
+          features_arg=(--features="$FEATURES")
+        fi
+        cargo test -vv --profile="$PROFILE" --target aarch64-pc-windows-gnullvm "${features_arg[@]}" --timings
 
     - name: Upload build timings
       uses: actions/upload-artifact@v7
       with:
-        name: build-timings.windows-11.arm64.test
+        name: build-timings.${{ matrix.name }}
         path: target/cargo-timings
         if-no-files-found: error
