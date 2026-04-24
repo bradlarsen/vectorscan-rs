@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Additions
 - Added Windows build support for MinGW GNU/LLVM toolchains on x86_64 and aarch64.
-  Because Windows Vectorscan builds are sensitive to the selected CMake generator, compiler, runtime, and target architecture, Windows targets use `HYPERSCAN_ROOT` to link against a Vectorscan/Hyperscan tree built with the matching toolchain.
+  Windows targets build the vendored Vectorscan source by default when `HYPERSCAN_ROOT` is unset.
 - Added a `HYPERSCAN_ROOT` override for linking against an existing Vectorscan/Hyperscan installation.
   The build script prefers static `libhs.a` when available, falls back to dynamic/import libraries, and accepts `HYPERSCAN_LINK_KIND=static` or `HYPERSCAN_LINK_KIND=dynamic` to choose explicitly.
 - Added Windows CI coverage for release, test, and `cpu_native` builds on x86_64 and aarch64.
@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixes
 - Fixed a Windows compile error in Vectorscan's FDR code caused by passing `size_t` and `unsigned long` values to `std::min`.
   The comparison now uses matching `size_t` arguments, preserving the existing stride selection behavior while compiling on Windows' 64-bit type model.
+- Fixed a Windows MinGW test-profile link error when building Rust test binaries against the vendored Vectorscan library.
+  The vendored x86 `SuperVector` implementation no longer emits duplicate copy-constructor definitions.
 - Fixed musl cross-compilation by supplying Vectorscan's `unistd.h` and `posix_memalign` configure results for musl targets.
 
 

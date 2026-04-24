@@ -54,11 +54,6 @@ fn main() {
 
     let build = match std::env::var_os("HYPERSCAN_ROOT") {
         Some(hs_root) => build_existing_hyperscan(Path::new(&hs_root)),
-        None if target.is_windows() => {
-            panic!(
-                "HYPERSCAN_ROOT must point to an installed Vectorscan/Hyperscan prefix on Windows"
-            )
-        }
         None => build_vendored_vectorscan(&manifest_dir, &out_dir, &target),
     };
 
@@ -136,6 +131,8 @@ fn build_vendored_vectorscan(manifest_dir: &Path, out_dir: &Path, target: &Targe
 
     cfg_define_feature!("BUILD_UNIT", "unit_hyperscan");
     cfg_define_feature!("USE_CPU_NATIVE", "cpu_native");
+
+    configure_windows_cmake(&mut cfg, target);
 
     if cfg!(feature = "asan") {
         cfg.define("SANITIZE", "address");
@@ -217,6 +214,26 @@ fn build_vendored_vectorscan(manifest_dir: &Path, out_dir: &Path, target: &Targe
         lib_dirs: vec![dst.join("lib"), dst.join("lib64")],
         source_built: true,
         link_kind: LinkKind::Static,
+    }
+}
+
+fn configure_windows_cmake(cfg: &mut cmake::Config, target: &Target) {
+    if !target.is_windows() {
+        return;
+    }
+
+    if env("HOST").contains("windows") {
+        if target.env == "gnu" || target.is_windows_gnullvm() {
+            cfg.generator("MinGW Makefiles");
+        }
+
+        if target.is_windows_gnullvm() {
+            cfg.define("CMAKE_C_COMPILER", "clang")
+                .define("CMAKE_CXX_COMPILER", "clang++");
+        } else if target.env == "gnu" {
+            cfg.define("CMAKE_C_COMPILER", "gcc")
+                .define("CMAKE_CXX_COMPILER", "g++");
+        }
     }
 }
 

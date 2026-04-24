@@ -323,15 +323,12 @@ jobs:
         - name: windows-2025.x86_64.release
           profile: release
           features: ''
-          use_cpu_native: OFF
         - name: windows-2025.x86_64.test
           profile: test
           features: ''
-          use_cpu_native: OFF
         - name: windows-2025.x86_64.release.cpu_native
           profile: release
           features: cpu_native
-          use_cpu_native: ON
 
     env:
       CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
@@ -365,43 +362,15 @@ jobs:
         toolchain: stable
         targets: x86_64-pc-windows-gnu
 
-    - name: Build Vectorscan
+    - name: Configure vendored Vectorscan build
       shell: msys2 {0}
       run: |
         set -euxo pipefail
-        repo_root="$(pwd)"
-        vectorscan_src="$repo_root/vectorscan-rs-sys/vectorscan"
-        build_dir=/tmp/vectorscan-build
-        rm -rf "$build_dir"
-        mkdir -p "$build_dir"
-        cd "$build_dir"
-        cmake "$vectorscan_src" \
-          -G "MinGW Makefiles" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DBUILD_STATIC_LIBS=ON \
-          -DBUILD_UNIT=OFF \
-          -DBUILD_TOOLS=OFF \
-          -DFAT_RUNTIME=OFF \
-          -DUSE_CPU_NATIVE=${{ matrix.use_cpu_native }} \
-          -DCMAKE_C_COMPILER=gcc \
-          -DCMAKE_CXX_COMPILER=g++ \
-          -DCMAKE_INSTALL_PREFIX=/mingw64
-        mingw32-make -j"$(nproc)"
-        mingw32-make install
-
         libgcc_a_path="$(x86_64-w64-mingw32-gcc -print-libgcc-file-name)"
         libgcc_dir="$(dirname "$libgcc_a_path")"
         {
-          echo "HYPERSCAN_ROOT=$(cygpath -m /mingw64)"
-          echo "HYPERSCAN_LINK_KIND=static"
           echo "LIBHS_NO_PKG_CONFIG=1"
-          echo "LIBRARY_PATH=/mingw64/lib:${LIBRARY_PATH:-}"
-          echo "CPATH=/mingw64/include:${CPATH:-}"
-          echo "PKG_CONFIG_ALLOW_CROSS=1"
-          echo "PKG_CONFIG_PATH=/mingw64/lib/pkgconfig"
-          echo "PKG_CONFIG_LIBDIR=/mingw64/lib/pkgconfig"
-          echo "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS=-L native=/mingw64/lib -L native=$libgcc_dir -C target-feature=+crt-static -C link-arg=-static"
+          echo "CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS=-L native=$libgcc_dir -C target-feature=+crt-static -C link-arg=-static"
         } >> "$GITHUB_ENV"
 
     - name: Build tests
@@ -445,15 +414,12 @@ jobs:
         - name: windows-11.arm64.release
           profile: release
           features: ''
-          use_cpu_native: OFF
         - name: windows-11.arm64.test
           profile: test
           features: ''
-          use_cpu_native: OFF
         - name: windows-11.arm64.release.cpu_native
           profile: release
           features: cpu_native
-          use_cpu_native: ON
 
     env:
       CC: clang
@@ -489,43 +455,13 @@ jobs:
         toolchain: stable
         targets: aarch64-pc-windows-gnullvm
 
-    - name: Build Vectorscan
+    - name: Configure vendored Vectorscan build
       shell: msys2 {0}
       run: |
         set -euxo pipefail
-        repo_root="$(pwd)"
-        vectorscan_src="$repo_root/vectorscan-rs-sys/vectorscan"
-        build_dir=/tmp/vectorscan-arm64-build
-        rm -rf "$build_dir"
-        mkdir -p "$build_dir"
-        cd "$build_dir"
-        cmake "$vectorscan_src" \
-          -G "MinGW Makefiles" \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DBUILD_STATIC_LIBS=ON \
-          -DBUILD_UNIT=OFF \
-          -DBUILD_TOOLS=OFF \
-          -DFAT_RUNTIME=OFF \
-          -DUSE_CPU_NATIVE=${{ matrix.use_cpu_native }} \
-          -DCMAKE_SYSTEM_NAME=Windows \
-          -DCMAKE_SYSTEM_PROCESSOR=ARM64 \
-          -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_INSTALL_PREFIX=/clangarm64
-        mingw32-make -j"$(nproc)"
-        mingw32-make install
-
         {
-          echo "HYPERSCAN_ROOT=$(cygpath -m /clangarm64)"
-          echo "HYPERSCAN_LINK_KIND=static"
           echo "LIBHS_NO_PKG_CONFIG=1"
-          echo "LIBRARY_PATH=/clangarm64/lib:${LIBRARY_PATH:-}"
-          echo "CPATH=/clangarm64/include:${CPATH:-}"
-          echo "PKG_CONFIG_ALLOW_CROSS=1"
-          echo "PKG_CONFIG_PATH=/clangarm64/lib/pkgconfig"
-          echo "PKG_CONFIG_LIBDIR=/clangarm64/lib/pkgconfig"
-          echo "CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS=-L native=/clangarm64/lib -C target-feature=+crt-static -C link-arg=-static"
+          echo "CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS=-C target-feature=+crt-static -C link-arg=-static"
         } >> "$GITHUB_ENV"
 
     - name: Build tests
