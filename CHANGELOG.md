@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixes
 - Fixed a Windows compile error in Vectorscan's FDR code caused by passing `size_t` and `unsigned long` values to `std::min`.
   The comparison now uses matching `size_t` arguments, preserving the existing stride selection behavior while compiling on Windows' 64-bit type model.
+- Fixed a Windows MinGW test-profile link error when building Rust test binaries against the vendored Vectorscan library.
+  The vendored x86 `SuperVector` implementation no longer emits duplicate copy-constructor definitions.
 - Fixed musl cross-compilation by supplying Vectorscan's `unistd.h` and `posix_memalign` configure results for musl targets.
 
 
