@@ -42,12 +42,6 @@
 #if !(!defined(RELEASE_BUILD) && defined(FAT_RUNTIME) && (defined(HAVE_AVX2) || defined(HAVE_AVX512))) && defined(HAVE_SIMD_128_BITS)
 
 template<>
-really_inline SuperVector<16>::SuperVector(SuperVector const &other)
-{
-    u.v128[0] = other.u.v128[0];
-}
-
-template<>
 really_inline SuperVector<16>::SuperVector(typename base_type::type const v)
 {
     u.v128[0] = v;
@@ -580,12 +574,6 @@ really_inline SuperVector<16> SuperVector<16>::pshufb_maskz(SuperVector<16> b, u
 
 // 256-bit AVX2 implementation
 #if !(!defined(RELEASE_BUILD) && defined(FAT_RUNTIME) && defined(HAVE_AVX512)) && defined(HAVE_AVX2)
-
-template<>
-really_inline SuperVector<32>::SuperVector(SuperVector const &other)
-{
-    u.v256[0] = other.u.v256[0];
-}
 
 template<>
 really_inline SuperVector<32>::SuperVector(typename base_type::type const v)
@@ -1176,12 +1164,6 @@ really_inline SuperVector<32> SuperVector<32>::pshufb_maskz(SuperVector<32> b, u
 
 // 512-bit AVX512 implementation
 #if defined(HAVE_AVX512)
-
-template<>
-really_inline SuperVector<64>::SuperVector(SuperVector const &o)
-{
-    u.v512[0] = o.u.v512[0];
-}
 
 template<>
 really_inline SuperVector<64>::SuperVector(typename base_type::type const v)
