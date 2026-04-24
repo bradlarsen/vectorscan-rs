@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Additions
 - Added Windows build support for MinGW GNU/LLVM toolchains on x86_64 and aarch64.
-  Because Windows Vectorscan builds are sensitive to the selected CMake generator, compiler, runtime, and target architecture, Windows targets use `HYPERSCAN_ROOT` to link against a Vectorscan/Hyperscan tree built with the matching toolchain.
+  Windows targets build the vendored Vectorscan source by default when `HYPERSCAN_ROOT` is unset.
 - Added a `HYPERSCAN_ROOT` override for linking against an existing Vectorscan/Hyperscan installation.
   The build script prefers static `libhs.a` when available, falls back to dynamic/import libraries, and accepts `HYPERSCAN_LINK_KIND=static` or `HYPERSCAN_LINK_KIND=dynamic` to choose explicitly.
 - Added Windows CI coverage for release, test, and `cpu_native` builds on x86_64 and aarch64.
