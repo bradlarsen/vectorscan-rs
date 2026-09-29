@@ -12,6 +12,7 @@ use super::{wrapper, AsResult, Error, HyperscanErrorCode, Pattern, ScanMode};
 /// The result returned by a scan callback
 ///
 /// This is also called a "match event handler" in the Vectorscan C API documentation.
+#[derive(Debug)]
 pub enum Scan {
     Continue,
     Terminate,
