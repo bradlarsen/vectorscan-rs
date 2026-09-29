@@ -171,8 +171,8 @@ fn main() {
             .allowlist_type("hs_.*")
             .allowlist_var("HS_.*")
             .header("wrapper.h")
-            .clang_arg(format!("-I{}", &include_dir))
-            .rust_target(bindgen::RustTarget::Stable_1_73);
+            .clang_arg(format!("-I{}", include_dir))
+            .rust_target(env!("CARGO_PKG_RUST_VERSION").parse().expect("valid"));
         config
             .generate()
             .expect("Unable to generate bindings")

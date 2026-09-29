@@ -38,7 +38,7 @@ unit_hyperscan = []
 asan = []
 
 [build-dependencies]
-bindgen = { version = "0.70", optional = true }
+bindgen = { version = "0.73", optional = true }
 cmake = "0.1"
 
 [lib]
