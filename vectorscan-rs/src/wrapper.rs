@@ -107,7 +107,7 @@ impl Database {
                 c_flags.as_ptr(),
                 c_ids.as_ptr(),
                 ptr::null(),
-                c_exprs.len() as u32,
+                u32::try_from(c_exprs.len())?,
                 mode.bits(),
                 ptr::null(),
                 db.as_mut_ptr(),

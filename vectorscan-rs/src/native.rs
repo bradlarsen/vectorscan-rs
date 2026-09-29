@@ -89,7 +89,7 @@ impl<'db> BlockScanner<'db> {
             hs::hs_scan(
                 self.db.inner.as_ptr(),
                 data.as_ptr() as *const _,
-                data.len() as u32,
+                u32::try_from(data.len())?,
                 0,
                 self.scratch.as_ptr(),
                 Some(on_match_trampoline::<F>),
@@ -250,7 +250,7 @@ impl<'ss> StreamScanner<'ss> {
             hs::hs_scan_stream(
                 self.stream.inner,
                 data.as_ptr() as *const _,
-                data.len() as u32,
+                u32::try_from(data.len())?,
                 0,
                 self.scanner.scratch.as_ptr(),
                 Some(on_match_trampoline::<F>),
