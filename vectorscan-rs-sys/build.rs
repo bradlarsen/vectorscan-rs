@@ -7,9 +7,9 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
-    // Note: use `rerun-if-changed=build.rs` to indicate that this build script *shouldn't* be
-    // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=build.rs"); //rerun if build script changed
+    println!("cargo:rerun-if-changed=src/bindings.rs"); //rerun if bindings changed
+    println!("cargo:rerun-if-changed=vectorscan"); //rerun if vendored library changed
 
     let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
@@ -171,7 +171,8 @@ fn main() {
             .allowlist_type("hs_.*")
             .allowlist_var("HS_.*")
             .header("wrapper.h")
-            .clang_arg(format!("-I{}", &include_dir));
+            .clang_arg(format!("-I{}", &include_dir))
+            .rust_target(bindgen::RustTarget::Stable_1_73);
         config
             .generate()
             .expect("Unable to generate bindings")
