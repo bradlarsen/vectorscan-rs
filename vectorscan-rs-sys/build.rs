@@ -20,26 +20,6 @@ fn main() {
         .into_string()
         .unwrap();
 
-    // Choose appropriate C++ runtime library
-    {
-        let compiler_version_out = String::from_utf8(
-            Command::new("c++")
-                .args(["-v"])
-                .output()
-                .expect("Failed to get C++ compiler version")
-                .stderr,
-        )
-        .unwrap();
-
-        if compiler_version_out.contains("gcc") {
-            println!("cargo:rustc-link-lib=stdc++");
-        } else if compiler_version_out.contains("clang") {
-            println!("cargo:rustc-link-lib=c++");
-        } else {
-            panic!("No compatible compiler found: either clang or gcc is needed");
-        }
-    }
-
     let vectorscan_src_dir = manifest_dir.join("vectorscan");
 
     // Build with cmake
