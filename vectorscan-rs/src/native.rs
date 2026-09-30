@@ -3,7 +3,7 @@ use std::ffi::{c_int, c_uint, c_ulonglong, c_void};
 use std::mem::MaybeUninit;
 use vectorscan_rs_sys as hs;
 
-use super::{wrapper, AsResult, Error, HyperscanErrorCode, Pattern, ScanMode};
+use super::{AsResult, Error, HyperscanErrorCode, Pattern, ScanMode, wrapper};
 
 // -------------------------------------------------------------------------------------------------
 // Scan Callback
@@ -295,9 +295,11 @@ unsafe extern "C" fn on_match_trampoline<F>(
 where
     F: FnMut(u32, u64, u64, u32) -> Scan,
 {
-    let context = (ctx as *mut Context<F>)
-        .as_mut()
-        .expect("context object should be set");
+    let context = unsafe {
+        (ctx as *mut Context<F>)
+            .as_mut()
+            .expect("context object should be set")
+    };
     match (context.on_match)(id, from, to, flags) {
         Scan::Continue => 0,
         Scan::Terminate => 1,
