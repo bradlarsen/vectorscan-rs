@@ -37,11 +37,12 @@ unit_hyperscan = []
 # This feature causes Vectorscan to build with address sanitizer enabled.
 asan = []
 
+[dependencies]
+link-cplusplus = "1"
+
 [build-dependencies]
-bindgen = { version = "0.70", optional = true }
+bindgen = { version = "0.73", optional = true }
 cmake = "0.1"
-flate2 = "1.0"
-tar = "0.4"
 
 [lib]
 doctest = false

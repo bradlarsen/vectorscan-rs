@@ -1,6 +1,6 @@
 use crate::error::{AsResult, Error};
 use bitflags::bitflags;
-use foreign_types::{foreign_type, ForeignType};
+use foreign_types::{ForeignType, foreign_type};
 use std::{ffi::CString, mem::MaybeUninit, ptr};
 use vectorscan_rs_sys as hs;
 
@@ -25,21 +25,21 @@ foreign_type! {
 }
 
 unsafe fn database_drop(v: *mut hs::hs_database_t) {
-    let res = hs::hs_free_database(v);
+    let res = unsafe { hs::hs_free_database(v) };
     if res != hs::HS_SUCCESS as hs::hs_error_t {
         panic!("hs_free_database failed: {res}");
     }
 }
 
 unsafe fn scratch_drop(v: *mut hs::hs_scratch_t) {
-    let res = hs::hs_free_scratch(v);
+    let res = unsafe { hs::hs_free_scratch(v) };
     if res != hs::HS_SUCCESS as hs::hs_error_t {
         panic!("hs_free_scratch failed: {res}");
     }
 }
 
 unsafe fn compile_error_drop(v: *mut hs::hs_compile_error_t) {
-    let res = hs::hs_free_compile_error(v);
+    let res = unsafe { hs::hs_free_compile_error(v) };
     if res != hs::HS_SUCCESS as hs::hs_error_t {
         panic!("hs_free_compile_error failed: {res}");
     }
@@ -107,7 +107,7 @@ impl Database {
                 c_flags.as_ptr(),
                 c_ids.as_ptr(),
                 ptr::null(),
-                c_exprs.len() as u32,
+                u32::try_from(c_exprs.len())?,
                 mode.bits(),
                 ptr::null(),
                 db.as_mut_ptr(),

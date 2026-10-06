@@ -12,6 +12,9 @@ pub enum Error {
 
     #[error("Pattern compilation failed, {0} at {1}")]
     HyperscanCompile(String, i32),
+
+    #[error("Input exceeded maximum length (u32::MAX)")]
+    InputTooLarge(#[from] std::num::TryFromIntError),
 }
 
 #[derive(Debug, PartialEq, Eq)]

@@ -7,9 +7,9 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
-    // Note: use `rerun-if-changed=build.rs` to indicate that this build script *shouldn't* be
-    // rerun: see https://doc.rust-lang.org/cargo/reference/build-scripts.html#change-detection
-    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=build.rs"); //rerun if build script changed
+    println!("cargo:rerun-if-changed=src/bindings.rs"); //rerun if bindings changed
+    println!("cargo:rerun-if-changed=vectorscan"); //rerun if vendored library changed
 
     let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
@@ -19,26 +19,6 @@ fn main() {
         .into_os_string()
         .into_string()
         .unwrap();
-
-    // Choose appropriate C++ runtime library
-    {
-        let compiler_version_out = String::from_utf8(
-            Command::new("c++")
-                .args(["-v"])
-                .output()
-                .expect("Failed to get C++ compiler version")
-                .stderr,
-        )
-        .unwrap();
-
-        if compiler_version_out.contains("gcc") {
-            println!("cargo:rustc-link-lib=stdc++");
-        } else if compiler_version_out.contains("clang") {
-            println!("cargo:rustc-link-lib=c++");
-        } else {
-            panic!("No compatible compiler found: either clang or gcc is needed");
-        }
-    }
 
     let vectorscan_src_dir = manifest_dir.join("vectorscan");
 
@@ -171,7 +151,8 @@ fn main() {
             .allowlist_type("hs_.*")
             .allowlist_var("HS_.*")
             .header("wrapper.h")
-            .clang_arg(format!("-I{}", &include_dir));
+            .clang_arg(format!("-I{}", include_dir))
+            .rust_target(env!("CARGO_PKG_RUST_VERSION").parse().expect("valid"));
         config
             .generate()
             .expect("Unable to generate bindings")

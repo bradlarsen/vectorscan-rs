@@ -3,7 +3,7 @@ use std::ffi::{c_int, c_uint, c_ulonglong, c_void};
 use std::mem::MaybeUninit;
 use vectorscan_rs_sys as hs;
 
-use super::{wrapper, AsResult, Error, HyperscanErrorCode, Pattern, ScanMode};
+use super::{AsResult, Error, HyperscanErrorCode, Pattern, ScanMode, wrapper};
 
 // -------------------------------------------------------------------------------------------------
 // Scan Callback
@@ -12,6 +12,7 @@ use super::{wrapper, AsResult, Error, HyperscanErrorCode, Pattern, ScanMode};
 /// The result returned by a scan callback
 ///
 /// This is also called a "match event handler" in the Vectorscan C API documentation.
+#[derive(Debug)]
 pub enum Scan {
     Continue,
     Terminate,
@@ -89,7 +90,7 @@ impl<'db> BlockScanner<'db> {
             hs::hs_scan(
                 self.db.inner.as_ptr(),
                 data.as_ptr() as *const _,
-                data.len() as u32,
+                u32::try_from(data.len())?,
                 0,
                 self.scratch.as_ptr(),
                 Some(on_match_trampoline::<F>),
@@ -250,7 +251,7 @@ impl<'ss> StreamScanner<'ss> {
             hs::hs_scan_stream(
                 self.stream.inner,
                 data.as_ptr() as *const _,
-                data.len() as u32,
+                u32::try_from(data.len())?,
                 0,
                 self.scanner.scratch.as_ptr(),
                 Some(on_match_trampoline::<F>),
@@ -294,9 +295,11 @@ unsafe extern "C" fn on_match_trampoline<F>(
 where
     F: FnMut(u32, u64, u64, u32) -> Scan,
 {
-    let context = (ctx as *mut Context<F>)
-        .as_mut()
-        .expect("context object should be set");
+    let context = unsafe {
+        (ctx as *mut Context<F>)
+            .as_mut()
+            .expect("context object should be set")
+    };
     match (context.on_match)(id, from, to, flags) {
         Scan::Continue => 0,
         Scan::Terminate => 1,
