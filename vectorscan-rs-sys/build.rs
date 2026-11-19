@@ -1,5 +1,7 @@
-use std::path::PathBuf;
-use std::process::Command;
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 /// Get the environment variable with the given name, panicking if it is not set.
 fn env(name: &str) -> String {
@@ -7,12 +9,41 @@ fn env(name: &str) -> String {
 }
 
 fn main() {
+    use system_deps::Error;
+
     println!("cargo:rerun-if-changed=build.rs"); //rerun if build script changed
     println!("cargo:rerun-if-changed=src/bindings.rs"); //rerun if bindings changed
     println!("cargo:rerun-if-changed=vectorscan"); //rerun if vendored library changed
 
-    let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
     let out_dir = PathBuf::from(env("OUT_DIR"));
+
+    let probe_res = system_deps::Config::new().probe();
+
+    // If someone is doing something system-deps, then listen
+    let include_dir = if has_system_deps_var() || probe_res.is_ok() {
+        let lib = probe_res.unwrap();
+        (*lib.all_include_paths().first().unwrap()).clone()
+    } else if let Err(Error::PkgConfig(_)) = probe_res {
+        // Fallback to building. Cannot use system-deps built-in fallback as it is a breaking change
+        let out_dir = build_vectorscan(&out_dir);
+        println!("cargo:rustc-link-lib=static=hs");
+        println!("cargo:rustc-link-search={}", out_dir.join("lib").display());
+        println!(
+            "cargo:rustc-link-search={}",
+            out_dir.join("lib64").display()
+        );
+
+        out_dir.join("include")
+    } else {
+        probe_res.unwrap();
+        unreachable!()
+    };
+
+    run_bindgen(&out_dir, &include_dir);
+}
+
+fn build_vectorscan(out_dir: &Path) -> PathBuf {
+    let manifest_dir = PathBuf::from(env("CARGO_MANIFEST_DIR"));
 
     let include_dir = out_dir
         .join("include")
@@ -23,7 +54,7 @@ fn main() {
     let vectorscan_src_dir = manifest_dir.join("vectorscan");
 
     // Build with cmake
-    {
+    let build_output = {
         let mut cfg = cmake::Config::new(&vectorscan_src_dir);
 
         macro_rules! cfg_define_feature {
@@ -125,12 +156,8 @@ fn main() {
                 .define("BUILD_SVE2_BITPERM", "OFF");
         }
 
-        let dst = cfg.build();
-
-        println!("cargo:rustc-link-lib=static=hs");
-        println!("cargo:rustc-link-search={}", dst.join("lib").display());
-        println!("cargo:rustc-link-search={}", dst.join("lib64").display());
-    }
+        cfg.build()
+    };
 
     // Run hyperscan unit test suite
     #[cfg(feature = "unit_hyperscan")]
@@ -143,6 +170,10 @@ fn main() {
         }
     }
 
+    build_output
+}
+
+fn run_bindgen(out_dir: &Path, include_dir: &Path) {
     // Run bindgen if needed, or else use the pre-generated bindings
     #[cfg(feature = "bindgen")]
     {
@@ -151,7 +182,7 @@ fn main() {
             .allowlist_type("hs_.*")
             .allowlist_var("HS_.*")
             .header("wrapper.h")
-            .clang_arg(format!("-I{}", include_dir))
+            .clang_arg(format!("-I{}", include_dir.display()))
             .rust_target(env!("CARGO_PKG_RUST_VERSION").parse().expect("valid"));
         config
             .generate()
@@ -164,4 +195,13 @@ fn main() {
         std::fs::copy("src/bindings.rs", out_dir.join("bindings.rs"))
             .expect("Failed to write Rust bindings to Vectorscan");
     }
+}
+
+fn has_system_deps_var() -> bool {
+    for (name, _) in env::vars_os() {
+        if name.as_encoded_bytes().starts_with(b"SYSTEM_DEPS") {
+            return true;
+        }
+    }
+    false
 }

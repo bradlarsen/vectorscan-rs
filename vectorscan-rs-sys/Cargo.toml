@@ -42,7 +42,11 @@ link-cplusplus = "1"
 
 [build-dependencies]
 bindgen = { version = "0.73", optional = true }
+system-deps = "9.0.1"
 cmake = "0.1"
 
 [lib]
 doctest = false
+
+[package.metadata.system-deps]
+vectorscan = { name = "libhs", version = ">= 5.4.12, < 6" }
