@@ -13,6 +13,9 @@ repository.workspace = true
 rust-version.workspace = true
 
 [features]
+# Arc-wrapped database and owned scanner types for cross-thread sharing.
+shared = []
+
 # Specialize the build of Vectorscan to use available SIMD instructions on the build system's CPU.
 # This will result in binary that is not portable to other CPUs.
 simd_specialization = ["vectorscan-rs-sys/simd_specialization"]
